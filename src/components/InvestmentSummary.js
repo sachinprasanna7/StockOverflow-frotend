@@ -73,8 +73,8 @@ export default function InvestmentSummary() {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={backgroundPattern}></div>
+<div style={Object.assign({ marginLeft: "250px", padding: "20px" }, containerStyle)}>
+<div style={backgroundPattern}></div>
 
       <div className="mb-4">
         <h3 style={{ color: "white", fontWeight: "600", marginBottom: "8px", fontSize: "24px" }}>

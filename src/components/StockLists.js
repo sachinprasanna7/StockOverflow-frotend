@@ -62,7 +62,8 @@ function StockCard({ title, stocks, category }) {
   };
 
   return (
-    <div className={`card h-100 shadow-sm ${getCardStyle()}`}>
+    <div  style={{ marginLeft: "250px", padding: "20px" }}
+     className={`card h-100 shadow-sm ${getCardStyle()}`}>
       <div className="card-body">
         <div className="d-flex align-items-center mb-3">
           <span className="fs-4 me-2">{getIcon()}</span>

@@ -7,9 +7,15 @@ export default function Sidebar() {
   const sidebarStyle = {
     width: "250px",
     backgroundColor: "#113F67",
-    minHeight: "100vh",
-    position: "relative"
+    height: "100vh",   // full viewport height
+    position: "fixed", // stays fixed when scrolling
+    top: 0,
+    left: 0,
+    display: "flex",
+    flexDirection: "column",
+    zIndex: 1000       // ensures sidebar is above content if needed
   };
+  
 
   const navLinkStyle = {
     color: "white",
@@ -72,34 +78,37 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <Nav className="flex-column" style={{ flex: 1 }}>
-        {[
-          { name: "Dashboard", icon: "📊" },
-          { name: "Portfolio", icon: "💼" },
-          { name: "Orders", icon: "📋" },
-          { name: "Transact", icon: "💳" },
-          { name: "SIPs", icon: "🔄" },
-          { name: "Watchlist", icon: "👁️" },
-          { name: "Settings", icon: "⚙️" }
-        ].map((item, index) => (
-          <Nav.Link
-            key={index}
-            href="#"
-            style={navLinkStyle}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = navLinkHoverStyle.backgroundColor;
-              e.target.style.paddingLeft = navLinkHoverStyle.paddingLeft;
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = "transparent";
-              e.target.style.paddingLeft = "16px";
-            }}
-          >
-            <span style={{ marginRight: "10px" }}>{item.icon}</span>
-            {item.name}
-          </Nav.Link>
-        ))}
-      </Nav>
+     {/* Scrollable Navigation Section */}
+<div style={{ flex: 1, overflowY: "auto", marginBottom: "20px" }}>
+  <Nav className="flex-column">
+    {[
+      { name: "Dashboard", icon: "📊" },
+      { name: "Portfolio", icon: "💼" },
+      { name: "Orders", icon: "📋" },
+      { name: "Transact", icon: "💳" },
+      { name: "SIPs", icon: "🔄" },
+      { name: "Watchlist", icon: "👁️" },
+      { name: "Settings", icon: "⚙️" }
+    ].map((item, index) => (
+      <Nav.Link
+        key={index}
+        href="#"
+        style={navLinkStyle}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = navLinkHoverStyle.backgroundColor;
+          e.target.style.paddingLeft = navLinkHoverStyle.paddingLeft;
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = "transparent";
+          e.target.style.paddingLeft = "16px";
+        }}
+      >
+        <span style={{ marginRight: "10px" }}>{item.icon}</span>
+        {item.name}
+      </Nav.Link>
+    ))}
+  </Nav>
+</div>
 
       {/* Bottom Image Placeholder */}
       <div style={bottomImageStyle}>

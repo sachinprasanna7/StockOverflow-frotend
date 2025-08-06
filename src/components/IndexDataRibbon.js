@@ -49,7 +49,7 @@ export default function IndexDataRibbon() {
   }, []);
 
   return (
-    <div>
+    <div style={{ marginLeft: "250px", padding: "20px" }}>
       <div className="d-flex justify-content-between text-center mb-3">
         {indexData.map((index, i) => (
           <div key={i} className="border p-2 flex-fill mx-1 position-relative">

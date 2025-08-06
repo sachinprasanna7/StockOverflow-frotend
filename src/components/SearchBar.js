@@ -121,7 +121,7 @@ export default function SearchBar() {
   };
 
   return (
-    <>
+     <div  style={{ marginLeft: "250px", padding: "20px" }}>
       {/* Backdrop */}
       {isSearchActive && <div style={backdropStyle} onClick={handleCloseSearch}></div>}
       
@@ -251,6 +251,6 @@ export default function SearchBar() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
