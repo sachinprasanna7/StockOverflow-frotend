@@ -7,8 +7,8 @@ import Watchlists from "./pages/Watchlists";
 
 export default function App() {
   return (
-   //<Dashboard />
-    //<OrderHistoryPage />
-    <Watchlists />
+  //  <Dashboard />
+    <OrderHistoryPage />
+    // <Watchlists />
   );
 }

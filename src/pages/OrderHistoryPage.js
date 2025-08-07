@@ -9,6 +9,7 @@ import StockLists from "../components/StockLists";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Orders from "../cards/OrderCard";
 import OrderHistory from "../components/OrderHistory";
+import SearchOrders from "../components/SearchOrders";
 export default function OrderHistoryPage() {
   return (
     <div className="d-flex min-vh-100">
@@ -16,8 +17,8 @@ export default function OrderHistoryPage() {
       <div className="flex-grow-1 bg-white p-4">
         <TimePeriod />
         <IndexDataRibbon />
-        <WelcomeText />
-        <SearchBar />
+        {/* <WelcomeText /> */}
+        {/* <SearchOrders /> */}
         <OrderHistory/>
        
       </div>
