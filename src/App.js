@@ -6,14 +6,16 @@ import OrderHistoryPage from "./pages/OrderHistoryPage";
 import Watchlists from "./pages/Watchlists";
 import SettingsPage from "./pages/SettingsPage";
 import PortfolioPage from "./pages/PortfolioPage";
+import StocksPage from "./pages/StocksPage";
 
 export default function App() {
   return (
    //<Dashboard />
-    //<OrderHistoryPage />
+    // <OrderHistoryPage />
     //<Watchlists />
     //<PortfolioPage />
-    <SettingsPage />
+    // <SettingsPage />
+    <StocksPage />
     //<PortfolioPage />
   );
 }
