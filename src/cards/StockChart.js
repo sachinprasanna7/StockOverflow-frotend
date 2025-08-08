@@ -276,27 +276,50 @@ export default function StockChart({ symbol = "AAPL" }) {
                         );
                     })}
                 </div>
-
+            </div>
+            
             {/* Chart Info */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginTop: '15px',
-                fontSize: '0.85rem',
-                color: '#6b7280'
+                marginTop: '20px',
+                padding: '15px 0',
+                borderTop: '1px solid #f3f4f6',
+                fontSize: '0.9rem',
+                color: '#6b7280',
+                flexWrap: 'wrap',
+                gap: '20px',
+                minHeight: '24px'
             }}>
-                <span>
-                    <strong>High:</strong> ${maxPrice.toFixed(2)}
+                <span style={{ 
+                    minWidth: 'fit-content',
+                    padding: '4px 8px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '4px',
+                    fontWeight: '500'
+                }}>
+                    <strong style={{ color: '#113F67' }}>High:</strong> ${maxPrice.toFixed(2)}
                 </span>
-                <span>
-                    <strong>Low:</strong> ${minPrice.toFixed(2)}
+                <span style={{ 
+                    minWidth: 'fit-content',
+                    padding: '4px 8px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '4px',
+                    fontWeight: '500'
+                }}>
+                    <strong style={{ color: '#113F67' }}>Low:</strong> ${minPrice.toFixed(2)}
                 </span>
-                <span>
-                    <strong>Range:</strong> {periodsToShow} periods
+                <span style={{ 
+                    minWidth: 'fit-content',
+                    padding: '4px 8px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '4px',
+                    fontWeight: '500'
+                }}>
+                    <strong style={{ color: '#113F67' }}>Range:</strong> {periodsToShow} periods
                 </span>
             </div>
-        </div>
         </div>
     );
 }
