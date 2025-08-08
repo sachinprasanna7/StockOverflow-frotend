@@ -10,6 +10,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Orders from "../cards/OrderCard";
 import OrderHistory from "../components/OrderHistory";
 import SearchOrders from "../components/SearchOrders";
+
 export default function OrderHistoryPage() {
   return (
     <div className="d-flex min-vh-100">

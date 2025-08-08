@@ -7,12 +7,14 @@ import Watchlists from "./pages/Watchlists";
 import SettingsPage from "./pages/SettingsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import StocksPage from "./pages/StocksPage";
+import TransactPage from "./pages/TransactPage";
 
 export default function App() {
   return (
-   //<Dashboard />
+    <TransactPage />
+    //<Dashboard />
     //<OrderHistoryPage />
-    <Watchlists />
+    //<Watchlists />
     //<PortfolioPage />
     //<SettingsPage />
     //<PortfolioPage />
