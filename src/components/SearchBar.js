@@ -2,26 +2,28 @@ import React, { useState, useRef, useEffect } from "react";
 import { Form, InputGroup } from "react-bootstrap";
 import { FaSearch, FaTimes, FaClock } from "react-icons/fa";
 
-export default function SearchBar() {
+export default function SearchBar({ onStockSelect }) {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recentSearches, setRecentSearches] = useState([]);
   const searchInputRef = useRef(null);
 
-  // Sample search results - replace with your actual search logic
+  // Sample search results with only symbol, companyName, and price
   const sampleResults = [
-    { symbol: "AAPL", name: "Apple Inc.", price: "$173.50", change: "+2.34%" },
-    { symbol: "GOOGL", name: "Alphabet Inc.", price: "$2,734.23", change: "+1.87%" },
-    { symbol: "TSLA", name: "Tesla Inc.", price: "$248.42", change: "-0.56%" },
-    { symbol: "MSFT", name: "Microsoft Corp.", price: "$378.91", change: "+0.92%" },
-    { symbol: "AMZN", name: "Amazon.com Inc.", price: "$3,094.67", change: "+1.23%" }
+    { symbol: "AAPL", companyName: "Apple Inc.", price: 173.50 },
+    { symbol: "GOOGL", companyName: "Alphabet Inc.", price: 2734.23 },
+    { symbol: "TSLA", companyName: "Tesla Inc.", price: 248.42 },
+    { symbol: "MSFT", companyName: "Microsoft Corp.", price: 378.91 },
+    { symbol: "AMZN", companyName: "Amazon.com Inc.", price: 3094.67 },
+    { symbol: "NVDA", companyName: "NVIDIA Corporation", price: 875.45 },
+    { symbol: "META", companyName: "Meta Platforms Inc.", price: 485.22 },
+    { symbol: "NFLX", companyName: "Netflix Inc.", price: 658.33 }
   ];
-
-  const recentSearches = ["AAPL", "GOOGL", "TSLA", "NVDA"];
 
   const filteredResults = searchQuery 
     ? sampleResults.filter(stock => 
         stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stock.name.toLowerCase().includes(searchQuery.toLowerCase())
+        stock.companyName.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
@@ -36,6 +38,29 @@ export default function SearchBar() {
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+  };
+
+  // Handle stock selection
+  const handleStockClick = (stock) => {
+    if (onStockSelect) {
+      onStockSelect(stock);
+    }
+    
+    // Add to recent searches (avoid duplicates and limit to 4 items)
+    setRecentSearches(prev => {
+      const filtered = prev.filter(item => item.symbol !== stock.symbol);
+      return [stock, ...filtered].slice(0, 4);
+    });
+    
+    handleCloseSearch();
+  };
+
+  // Handle recent search click
+  const handleRecentSearchClick = (recentStock) => {
+    if (onStockSelect) {
+      onStockSelect(recentStock);
+    }
+    handleCloseSearch();
   };
 
   // Close search on Escape key
@@ -167,26 +192,67 @@ export default function SearchBar() {
                   alignItems: "center",
                   gap: "8px"
                 }}>
-                  <FaClock /> Recent Searches
+                  <FaClock /> {recentSearches.length > 0 ? "Recent Searches" : "Popular Searches"}
                 </div>
-                {recentSearches.map((search, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      ...resultItemStyle,
-                      border: "none",
-                      padding: "8px 16px",
-                      backgroundColor: "#f8f9fa",
-                      borderRadius: "8px",
-                      margin: "4px 0",
-                      fontSize: "14px"
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#e9ecef"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                  >
-                    {search}
-                  </div>
-                ))}
+                {recentSearches.length > 0 ? (
+                  recentSearches.map((recentStock, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        ...resultItemStyle,
+                        border: "none",
+                        padding: "12px 16px",
+                        backgroundColor: "#f8f9fa",
+                        borderRadius: "8px",
+                        margin: "4px 0",
+                        fontSize: "14px"
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = "#e9ecef"}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                      onClick={() => handleRecentSearchClick(recentStock)}
+                    >
+                      <div>
+                        <div style={{ fontWeight: "600", color: "#113F67" }}>
+                          {recentStock.symbol}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#6c757d" }}>
+                          {recentStock.companyName}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  // Show popular suggestions when no recent searches
+                  ["AAPL", "GOOGL", "TSLA", "NVDA"].map((symbol, index) => {
+                    const stock = sampleResults.find(s => s.symbol === symbol);
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          ...resultItemStyle,
+                          border: "none",
+                          padding: "12px 16px",
+                          backgroundColor: "#f8f9fa",
+                          borderRadius: "8px",
+                          margin: "4px 0",
+                          fontSize: "14px"
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = "#e9ecef"}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                        onClick={() => handleStockClick(stock)}
+                      >
+                        <div>
+                          <div style={{ fontWeight: "600", color: "#113F67" }}>
+                            {stock.symbol}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "#6c757d" }}>
+                            {stock.companyName}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             ) : filteredResults.length > 0 ? (
               // Search Results
@@ -206,6 +272,7 @@ export default function SearchBar() {
                     style={resultItemStyle}
                     onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
                     onMouseLeave={(e) => e.target.style.backgroundColor = "white"}
+                    onClick={() => handleStockClick(stock)}
                   >
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
@@ -213,23 +280,12 @@ export default function SearchBar() {
                           {stock.symbol}
                         </div>
                         <div style={{ fontSize: "14px", color: "#6c757d" }}>
-                          {stock.name}
+                          {stock.companyName}
                         </div>
                       </div>
                       <div className="text-end">
                         <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                          {stock.price}
-                        </div>
-                        <div style={{ 
-                          fontSize: "14px", 
-                          color: stock.change.startsWith('+') ? "#22c55e" : "#ef4444",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-end",
-                          gap: "4px"
-                        }}>
-                          <FaClock size={12} />
-                          {stock.change}
+                          ${stock.price.toFixed(2)}
                         </div>
                       </div>
                     </div>
