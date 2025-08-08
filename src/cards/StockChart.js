@@ -1,29 +1,64 @@
 import React, { useState } from 'react';
 
+// Helper function to get current period (copied from TimePeriod.js)
+function getPeriodFromTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  
+  const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+  const period = Math.floor(totalSeconds / 20) + 1;
+  return period;
+}
+
+// Generate mock historical data for periods
+function generatePeriodData(periodsToShow, currentPeriod) {
+    const data = [];
+    const basePrice = 150.25; // Base stock price
+    
+    for (let i = periodsToShow - 1; i >= 0; i--) {
+        const periodNumber = currentPeriod - i;
+        // Generate some realistic price variation (±5% from base)
+        const variation = (Math.sin(periodNumber * 0.1) * 0.05 + Math.random() * 0.02 - 0.01);
+        const price = basePrice * (1 + variation);
+        
+        data.push({
+            period: periodNumber > 0 ? periodNumber : 1,
+            price: Math.max(price, 1) // Ensure price is positive
+        });
+    }
+    
+    return data;
+}
+
 export default function StockChart({ symbol = "AAPL" }) {
-    const [timeFrame, setTimeFrame] = useState('week'); // 'week' or 'month'
-
-    // Dummy data for demonstration
-    const weeklyData = [
-        { day: 'Mon', price: 148.50 },
-        { day: 'Tue', price: 149.20 },
-        { day: 'Wed', price: 150.75 },
-        { day: 'Thu', price: 149.80 },
-        { day: 'Fri', price: 150.25 },
-        { day: 'Sat', price: 151.10 },
-        { day: 'Sun', price: 150.90 }
-    ];
-
-    const monthlyData = [
-        { period: 'Week 1', price: 147.30 },
-        { period: 'Week 2', price: 149.50 },
-        { period: 'Week 3', price: 148.90 },
-        { period: 'Week 4', price: 150.25 }
-    ];
-
-    const currentData = timeFrame === 'week' ? weeklyData : monthlyData;
+    const [periodsToShow, setPeriodsToShow] = useState(10); // Default to last 10 periods
+    const currentPeriod = getPeriodFromTime();
+    const currentData = generatePeriodData(periodsToShow, currentPeriod);
     const maxPrice = Math.max(...currentData.map(d => d.price));
     const minPrice = Math.min(...currentData.map(d => d.price));
+
+    // Predefined common period options
+    const commonPeriods = [5, 10, 20, 50, 100, 200, 500, 1000];
+
+    // Generate Y-axis labels
+    const generateYAxisLabels = () => {
+        const priceRange = maxPrice - minPrice;
+        const stepSize = priceRange / 4; // 5 labels (0, 25, 50, 75, 100%)
+        const labels = [];
+        
+        for (let i = 0; i <= 4; i++) {
+            const price = minPrice + (stepSize * i);
+            labels.push({
+                value: price,
+                position: 100 - (i * 25) // Invert for display (0% = bottom, 100% = top)
+            });
+        }
+        return labels.reverse(); // Top to bottom order
+    };
+
+    const yAxisLabels = generateYAxisLabels();
 
     return (
         <div style={{
@@ -34,7 +69,7 @@ export default function StockChart({ symbol = "AAPL" }) {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             border: '1px solid #e5e7eb'
         }}>
-            {/* Header with title and toggle */}
+            {/* Header with title and period selection */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -50,71 +85,94 @@ export default function StockChart({ symbol = "AAPL" }) {
                     {symbol} Stock Chart
                 </h3>
                 
-                {/* Toggle Button */}
+                {/* Period Selection Dropdown */}
                 <div style={{
                     display: 'flex',
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '8px',
-                    padding: '4px'
+                    alignItems: 'center',
+                    gap: '8px',
+                    backgroundColor: '#f8f9fa',
+                    padding: '8px 12px',
+                    borderRadius: '8px'
                 }}>
-                    <button
-                        onClick={() => setTimeFrame('week')}
+                    <label style={{
+                        fontSize: '0.85rem',
+                        fontWeight: '500',
+                        color: '#113F67',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        Last
+                    </label>
+                    <select
+                        value={periodsToShow}
+                        onChange={(e) => setPeriodsToShow(parseInt(e.target.value))}
                         style={{
-                            padding: '8px 16px',
-                            border: 'none',
-                            borderRadius: '6px',
-                            backgroundColor: timeFrame === 'week' ? '#113F67' : 'transparent',
-                            color: timeFrame === 'week' ? 'white' : '#6b7280',
-                            fontSize: '0.9rem',
-                            fontWeight: '500',
+                            padding: '4px 8px',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '4px',
+                            backgroundColor: 'white',
+                            color: '#113F67',
+                            fontSize: '0.85rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease'
+                            outline: 'none',
+                            minWidth: '60px'
                         }}
                     >
-                        Week
-                    </button>
-                    <button
-                        onClick={() => setTimeFrame('month')}
-                        style={{
-                            padding: '8px 16px',
-                            border: 'none',
-                            borderRadius: '6px',
-                            backgroundColor: timeFrame === 'month' ? '#113F67' : 'transparent',
-                            color: timeFrame === 'month' ? 'white' : '#6b7280',
-                            fontSize: '0.9rem',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        Month
-                    </button>
+                        {commonPeriods.map(period => (
+                            <option key={period} value={period}>
+                                {period}
+                            </option>
+                        ))}
+                    </select>
+                    <span style={{
+                        fontSize: '0.85rem',
+                        color: '#6b7280',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        periods
+                    </span>
                 </div>
             </div>
 
             {/* Line Chart Visualization */}
             <div style={{
-                height: '300px',
+                height: '320px',
                 position: 'relative',
-                padding: '10px 0',
+                padding: '20px 0',
                 borderTop: '1px solid #e5e7eb',
                 borderBottom: '1px solid #e5e7eb'
             }}>
                 {/* Chart Container */}
                 <div style={{
                     position: 'relative',
-                    height: '220px',
-                    margin: '30px 40px 20px 40px'
+                    height: '240px',
+                    margin: '20px 60px 20px 80px' // More left margin for Y-axis labels
                 }}>
+                    {/* Y-axis Labels */}
+                    {yAxisLabels.map((label, index) => (
+                        <div key={index} style={{
+                            position: 'absolute',
+                            left: '-70px',
+                            top: `${label.position}%`,
+                            transform: 'translateY(-50%)',
+                            fontSize: '0.75rem',
+                            color: '#6b7280',
+                            fontWeight: '500',
+                            textAlign: 'right',
+                            width: '60px'
+                        }}>
+                            ${label.value.toFixed(2)}
+                        </div>
+                    ))}
+                    
                     {/* Grid Lines */}
-                    {[0, 25, 50, 75, 100].map(line => (
+                    {[0, 20, 40, 60, 80, 100].map(line => (
                         <div key={line} style={{
                             position: 'absolute',
                             top: `${line}%`,
                             left: '0',
                             right: '0',
                             height: '1px',
-                            backgroundColor: '#f3f4f6',
+                            backgroundColor: line === 0 || line === 100 ? '#d1d5db' : '#f3f4f6',
                             zIndex: '1'
                         }} />
                     ))}
@@ -127,72 +185,63 @@ export default function StockChart({ symbol = "AAPL" }) {
                         viewBox="0 0 100 100"
                         preserveAspectRatio="none"
                     >
+                        {/* Gradient Definition */}
+                        <defs>
+                            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#113F67" stopOpacity="0.1"/>
+                                <stop offset="100%" stopColor="#113F67" stopOpacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        
+                        {/* Area under line */}
+                        <path
+                            d={currentData.map((dataPoint, index) => {
+                                const x = (index / (currentData.length - 1)) * 95 + 2.5;
+                                const heightPercentage = ((dataPoint.price - minPrice) / (maxPrice - minPrice)) * 80 + 10;
+                                const y = 100 - heightPercentage;
+                                if (index === 0) return `M ${x} ${y}`;
+                                if (index === currentData.length - 1) return `L ${x} ${y} L ${x} 100 L 2.5 100 Z`;
+                                return `L ${x} ${y}`;
+                            }).join(' ')}
+                            fill="url(#lineGradient)"
+                        />
+                        
                         {/* Line Path */}
                         <path
                             d={currentData.map((dataPoint, index) => {
-                                const x = (index / (currentData.length - 1)) * 90 + 5; // Keep within 5-95% range
-                                const heightPercentage = ((dataPoint.price - minPrice) / (maxPrice - minPrice)) * 70 + 15; // Keep within 15-85% range
+                                const x = (index / (currentData.length - 1)) * 95 + 2.5;
+                                const heightPercentage = ((dataPoint.price - minPrice) / (maxPrice - minPrice)) * 80 + 10;
                                 const y = 100 - heightPercentage;
                                 return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                             }).join(' ')}
                             stroke="#113F67"
-                            strokeWidth="0.8"
+                            strokeWidth="0.5"
                             fill="none"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             vectorEffect="non-scaling-stroke"
                         />
                         
-                        {/* Data Points */}
+                        {/* Data Points - Simple, no interaction */}
                         {currentData.map((dataPoint, index) => {
-                            const x = (index / (currentData.length - 1)) * 90 + 5;
-                            const heightPercentage = ((dataPoint.price - minPrice) / (maxPrice - minPrice)) * 70 + 15;
+                            const x = (index / (currentData.length - 1)) * 95 + 2.5;
+                            const heightPercentage = ((dataPoint.price - minPrice) / (maxPrice - minPrice)) * 80 + 10;
                             const y = 100 - heightPercentage;
                             
                             return (
-                                <g key={index}>
-                                    {/* Point Circle */}
-                                    <circle
-                                        cx={x}
-                                        cy={y}
-                                        r="1.2"
-                                        fill="#113F67"
-                                        stroke="white"
-                                        strokeWidth="0.3"
-                                        vectorEffect="non-scaling-stroke"
-                                    />
-                                </g>
+                                <circle
+                                    key={index}
+                                    cx={x}
+                                    cy={y}
+                                    r="0.8"
+                                    fill="#113F67"
+                                    stroke="white"
+                                    strokeWidth="0.2"
+                                    vectorEffect="non-scaling-stroke"
+                                />
                             );
                         })}
                     </svg>
-                    
-                    {/* Price Labels positioned outside SVG */}
-                    {currentData.map((dataPoint, index) => {
-                        const x = (index / (currentData.length - 1)) * 90 + 5;
-                        const heightPercentage = ((dataPoint.price - minPrice) / (maxPrice - minPrice)) * 70 + 15;
-                        const y = 100 - heightPercentage;
-                        
-                        return (
-                            <div
-                                key={index}
-                                style={{
-                                    position: 'absolute',
-                                    left: `${x}%`,
-                                    top: `${y - 8}%`,
-                                    transform: 'translateX(-50%)',
-                                    fontSize: '0.7rem',
-                                    color: '#113F67',
-                                    fontWeight: '600',
-                                    backgroundColor: 'rgba(255,255,255,0.8)',
-                                    padding: '2px 4px',
-                                    borderRadius: '3px',
-                                    whiteSpace: 'nowrap'
-                                }}
-                            >
-                                ${dataPoint.price.toFixed(1)}
-                            </div>
-                        );
-                    })}
                 </div>
                 
                 {/* X-axis Labels */}
@@ -200,28 +249,41 @@ export default function StockChart({ symbol = "AAPL" }) {
                     display: 'flex',
                     justifyContent: 'space-between',
                     marginTop: '10px',
-                    padding: '0 40px'
+                    padding: '0 60px 0 80px' // Match the chart container margins
                 }}>
-                    {currentData.map((dataPoint, index) => (
-                        <div key={index} style={{
-                            fontSize: '0.75rem',
-                            color: '#6b7280',
-                            fontWeight: '500',
-                            textAlign: 'center',
-                            flex: '1'
-                        }}>
-                            {dataPoint.day || dataPoint.period}
-                        </div>
-                    ))}
+                    {currentData.map((dataPoint, index) => {
+                        // Show labels more intelligently based on data size
+                        let showLabel = false;
+                        if (periodsToShow <= 10) {
+                            showLabel = true; // Show all labels for small datasets
+                        } else if (periodsToShow <= 50) {
+                            showLabel = index % 5 === 0 || index === currentData.length - 1; // Every 5th
+                        } else {
+                            showLabel = index % Math.ceil(periodsToShow / 8) === 0 || index === currentData.length - 1; // ~8 labels max
+                        }
+                        
+                        return (
+                            <div key={index} style={{
+                                fontSize: '0.7rem',
+                                color: showLabel ? '#6b7280' : 'transparent',
+                                fontWeight: '500',
+                                textAlign: 'center',
+                                flex: '1',
+                                minWidth: '0'
+                            }}>
+                                {showLabel ? `P${dataPoint.period}` : ''}
+                            </div>
+                        );
+                    })}
                 </div>
-            </div>
 
             {/* Chart Info */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 marginTop: '15px',
-                fontSize: '0.9rem',
+                fontSize: '0.85rem',
                 color: '#6b7280'
             }}>
                 <span>
@@ -231,9 +293,10 @@ export default function StockChart({ symbol = "AAPL" }) {
                     <strong>Low:</strong> ${minPrice.toFixed(2)}
                 </span>
                 <span>
-                    <strong>Period:</strong> {timeFrame === 'week' ? 'Last 7 Days' : 'Last 4 Weeks'}
+                    <strong>Range:</strong> {periodsToShow} periods
                 </span>
             </div>
+        </div>
         </div>
     );
 }
