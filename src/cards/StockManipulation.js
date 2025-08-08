@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import bootstrap from "bootstrap/dist/css/bootstrap.min.css";
 
 export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.25 }) {
     const [investmentType, setInvestmentType] = useState('SIP'); // 'SIP' or 'Delivery'
     const [showBuyForm, setShowBuyForm] = useState(false);
     const [showSellForm, setShowSellForm] = useState(false);
     const [showWatchlistForm, setShowWatchlistForm] = useState(false);
+    const [showSIPForm, setShowSIPForm] = useState(false);
     const [quantity, setQuantity] = useState('');
+    const [sipAmount, setSipAmount] = useState('');
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
     const [selectedWatchlists, setSelectedWatchlists] = useState([]);
@@ -26,10 +27,12 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
 
     const clearForms = () => {
         setQuantity('');
+        setSipAmount('');
         setErrors({});
         setShowBuyForm(false);
         setShowSellForm(false);
         setShowWatchlistForm(false);
+        setShowSIPForm(false);
         setSelectedWatchlists([]);
         // Don't clear success message here - let it display
     };
@@ -51,17 +54,44 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
     };
 
     const handleSIPBuy = () => {
-        // For SIP, buy 1 share at current price
-        const totalCost = currentPrice;
-        if (totalCost > userBalance) {
-            setErrors({ balance: `Insufficient balance. Required: $${totalCost.toFixed(2)}, Available: $${userBalance.toFixed(2)}` });
+        // Validate investment amount
+        const validationErrors = {};
+        const investmentAmount = parseFloat(sipAmount);
+        
+        if (!sipAmount || sipAmount.trim() === '') {
+            validationErrors.sipAmount = 'Investment amount is required';
+        } else if (isNaN(investmentAmount) || investmentAmount <= 0) {
+            validationErrors.sipAmount = 'Investment amount must be a positive number';
+        } else if (investmentAmount > userBalance) {
+            validationErrors.sipAmount = `Insufficient balance. Available: $${userBalance.toFixed(2)}`;
+        }
+        
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        
+        // Calculate maximum shares that can be bought
+        const maxShares = Math.floor(investmentAmount / currentPrice);
+        const totalCost = maxShares * currentPrice;
+        const remainingMoney = investmentAmount - totalCost;
+        
+        if (maxShares === 0) {
+            setErrors({ sipAmount: `Investment amount too low. Minimum required: $${currentPrice.toFixed(2)}` });
             return;
         }
         
         setUserBalance(prev => prev - totalCost);
-        setUserHoldings(prev => prev + 1);
-        setSuccessMessage(`🎉 Congratulations! You successfully bought 1 share of ${symbol} for $${totalCost.toFixed(2)}!`);
-        setTimeout(() => setSuccessMessage(''), 10000);
+        setUserHoldings(prev => prev + maxShares);
+        
+        let message = `🎉 Congratulations! You successfully bought ${maxShares} shares of ${symbol} for $${totalCost.toFixed(2)}!`;
+        if (remainingMoney > 0) {
+            message += ` $${remainingMoney.toFixed(2)} has been returned to your balance.`;
+        }
+        
+        clearForms();
+        setSuccessMessage(message);
+        setTimeout(() => setSuccessMessage(''), 12000);
     };
 
     const handleBuy = () => {
@@ -245,7 +275,7 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
             )}
 
             {/* Error Messages */}
-            {(errors.balance || errors.quantity || errors.watchlist) && (
+            {(errors.balance || errors.quantity || errors.watchlist || errors.sipAmount) && (
                 <div style={{
                     padding: '12px',
                     backgroundColor: '#f8d7da',
@@ -257,6 +287,7 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
                     {errors.balance && <div>{errors.balance}</div>}
                     {errors.quantity && <div>{errors.quantity}</div>}
                     {errors.watchlist && <div>{errors.watchlist}</div>}
+                    {errors.sipAmount && <div>{errors.sipAmount}</div>}
                 </div>
             )}
 
@@ -270,7 +301,15 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
                 {investmentType === 'SIP' ? (
                     <>
                         <button
-                            onClick={handleSIPBuy}
+                            onClick={() => {
+                                setShowSIPForm(true);
+                                setShowBuyForm(false);
+                                setShowSellForm(false);
+                                setShowWatchlistForm(false);
+                                setSipAmount('');
+                                setErrors({});
+                                setSuccessMessage('');
+                            }}
                             style={{
                                 padding: '12px 25px',
                                 backgroundColor: '#28a745',
@@ -285,7 +324,7 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
                             onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
                             onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
                         >
-                            Buy (SIP) - ${currentPrice.toFixed(2)}
+                            Invest in SIP
                         </button>
                         <button
                             onClick={() => {
@@ -387,6 +426,79 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
                     </>
                 )}
             </div>
+
+            {/* SIP Investment Form */}
+            {showSIPForm && investmentType === 'SIP' && (
+                <div style={{
+                    marginTop: '25px',
+                    padding: '20px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '8px',
+                    border: '1px solid #dee2e6'
+                }}>
+                    <h4 style={{ color: '#113F67', marginBottom: '15px' }}>SIP Investment for {symbol}</h4>
+                    <div style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600' }}>
+                            Investment Amount * (USD)
+                        </label>
+                        <input
+                            type="number"
+                            value={sipAmount}
+                            onChange={(e) => setSipAmount(e.target.value)}
+                            placeholder="Enter amount to invest (e.g., 1000)"
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ced4da',
+                                borderRadius: '4px',
+                                fontSize: '1rem'
+                            }}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '15px' }}>
+                        <p><strong>Current Price per share:</strong> ${currentPrice.toFixed(2)}</p>
+                        {sipAmount && !isNaN(sipAmount) && parseFloat(sipAmount) > 0 && (
+                            <>
+                                <p><strong>Maximum shares you can buy:</strong> {Math.floor(parseFloat(sipAmount) / currentPrice)} shares</p>
+                                <p><strong>Cost for maximum shares:</strong> ${(Math.floor(parseFloat(sipAmount) / currentPrice) * currentPrice).toFixed(2)}</p>
+                                {parseFloat(sipAmount) % currentPrice > 0 && (
+                                    <p style={{ color: '#6c757d' }}>
+                                        <strong>Remaining amount to be returned:</strong> ${(parseFloat(sipAmount) - (Math.floor(parseFloat(sipAmount) / currentPrice) * currentPrice)).toFixed(2)}
+                                    </p>
+                                )}
+                            </>
+                        )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button
+                            onClick={handleSIPBuy}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Confirm SIP Investment
+                        </button>
+                        <button
+                            onClick={clearForms}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#6c757d',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Buy Form for Stock Delivery */}
             {showBuyForm && investmentType === 'Delivery' && (
