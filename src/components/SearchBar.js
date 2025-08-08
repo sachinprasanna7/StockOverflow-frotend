@@ -1,31 +1,45 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Form, InputGroup } from "react-bootstrap";
 import { FaSearch, FaTimes, FaClock } from "react-icons/fa";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchBar({ onStockSelect }) {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [loading, setLoading] = useState(false);
   const searchInputRef = useRef(null);
+  const debounceTimeout = useRef(null);
 
-  // Sample search results with only symbol, companyName, and price
-  const sampleResults = [
-    { symbol: "AAPL", companyName: "Apple Inc.", price: 173.50 },
-    { symbol: "GOOGL", companyName: "Alphabet Inc.", price: 2734.23 },
-    { symbol: "TSLA", companyName: "Tesla Inc.", price: 248.42 },
-    { symbol: "MSFT", companyName: "Microsoft Corp.", price: 378.91 },
-    { symbol: "AMZN", companyName: "Amazon.com Inc.", price: 3094.67 },
-    { symbol: "NVDA", companyName: "NVIDIA Corporation", price: 875.45 },
-    { symbol: "META", companyName: "Meta Platforms Inc.", price: 485.22 },
-    { symbol: "NFLX", companyName: "Netflix Inc.", price: 658.33 }
-  ];
-
-  const filteredResults = searchQuery 
-    ? sampleResults.filter(stock => 
-        stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stock.companyName.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
+  // Debounced API search
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/stock/search", {
+          params: { query: searchQuery }
+        });
+        console.log(res.data);
+        for (let stock of res.data) {
+          stock.symbol = stock.symbol.toUpperCase();
+        }
+        setSearchResults(res.data || []);
+      } catch (err) {
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 350); // 350ms debounce
+    return () => clearTimeout(debounceTimeout.current);
+  }, [searchQuery]);
 
   const handleSearchFocus = () => {
     setIsSearchActive(true);
@@ -34,28 +48,39 @@ export default function SearchBar({ onStockSelect }) {
   const handleCloseSearch = () => {
     setIsSearchActive(false);
     setSearchQuery("");
+    setSearchResults([]);
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Handle stock selection
+  // // Handle stock selection
+  // const handleStockClick = async (stock) => {
+
+  //   // navigate to the stocks page
+
+  //   if (onStockSelect) {
+  //     // Optionally fetch price here if needed
+  //     onStockSelect(stock);
+  //   }
+  //   setRecentSearches(prev => {
+  //     const filtered = prev.filter(item => item.symbol !== stock.symbol);
+  //     return [stock, ...filtered].slice(0, 4);
+  //   });
+  //   handleCloseSearch();
+  // };
+
+  const navigate = useNavigate();
+
   const handleStockClick = (stock) => {
-    if (onStockSelect) {
-      onStockSelect(stock);
-    }
-    
-    // Add to recent searches (avoid duplicates and limit to 4 items)
-    setRecentSearches(prev => {
-      const filtered = prev.filter(item => item.symbol !== stock.symbol);
-      return [stock, ...filtered].slice(0, 4);
-    });
-    
+    // Navigate to StockPage with symbol param
+    navigate(`/stock/${stock.symbol_id}`);
+
+    // Optional: close search UI
     handleCloseSearch();
   };
 
-  // Handle recent search click
   const handleRecentSearchClick = (recentStock) => {
     if (onStockSelect) {
       onStockSelect(recentStock);
@@ -63,7 +88,6 @@ export default function SearchBar({ onStockSelect }) {
     handleCloseSearch();
   };
 
-  // Close search on Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
@@ -146,11 +170,8 @@ export default function SearchBar({ onStockSelect }) {
   };
 
   return (
-     <div  style={{ marginLeft: "250px", padding: "20px" }}>
-      {/* Backdrop */}
+    <div style={{ marginLeft: "250px", padding: "20px" }}>
       {isSearchActive && <div style={backdropStyle} onClick={handleCloseSearch}></div>}
-      
-      {/* Search Bar */}
       <div style={isSearchActive ? overlaySearchStyle : normalSearchStyle} className="mb-4 position-relative">
         <InputGroup>
           <Form.Control
@@ -162,31 +183,23 @@ export default function SearchBar({ onStockSelect }) {
             onFocus={handleSearchFocus}
             style={searchInputStyle}
           />
-          <InputGroup.Text 
-            style={searchButtonStyle}
-            className={isSearchActive ? "" : ""}
-          >
+          <InputGroup.Text style={searchButtonStyle}>
             {isSearchActive ? (
-              <FaTimes 
-                style={{ color: "white", cursor: "pointer" }} 
-                onClick={handleCloseSearch}
-              />
+              <FaTimes style={{ color: "white", cursor: "pointer" }} onClick={handleCloseSearch} />
             ) : (
               <FaSearch style={{ color: "white" }} />
             )}
           </InputGroup.Text>
         </InputGroup>
 
-        {/* Search Results */}
         {isSearchActive && (
           <div style={resultsContainerStyle}>
             {searchQuery === "" ? (
-              // Recent Searches
               <div style={{ padding: "20px" }}>
-                <div style={{ 
-                  color: "#6c757d", 
-                  fontSize: "14px", 
-                  fontWeight: "600", 
+                <div style={{
+                  color: "#6c757d",
+                  fontSize: "14px",
+                  fontWeight: "600",
                   marginBottom: "12px",
                   display: "flex",
                   alignItems: "center",
@@ -207,8 +220,8 @@ export default function SearchBar({ onStockSelect }) {
                         margin: "4px 0",
                         fontSize: "14px"
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = "#e9ecef"}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                      onMouseEnter={e => e.target.style.backgroundColor = "#e9ecef"}
+                      onMouseLeave={e => e.target.style.backgroundColor = "#f8f9fa"}
                       onClick={() => handleRecentSearchClick(recentStock)}
                     >
                       <div>
@@ -223,81 +236,74 @@ export default function SearchBar({ onStockSelect }) {
                   ))
                 ) : (
                   // Show popular suggestions when no recent searches
-                  ["AAPL", "GOOGL", "TSLA", "NVDA"].map((symbol, index) => {
-                    const stock = sampleResults.find(s => s.symbol === symbol);
-                    return (
-                      <div
-                        key={index}
-                        style={{
-                          ...resultItemStyle,
-                          border: "none",
-                          padding: "12px 16px",
-                          backgroundColor: "#f8f9fa",
-                          borderRadius: "8px",
-                          margin: "4px 0",
-                          fontSize: "14px"
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = "#e9ecef"}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                        onClick={() => handleStockClick(stock)}
-                      >
-                        <div>
-                          <div style={{ fontWeight: "600", color: "#113F67" }}>
-                            {stock.symbol}
-                          </div>
-                          <div style={{ fontSize: "12px", color: "#6c757d" }}>
-                            {stock.companyName}
-                          </div>
+                  ["AAPL", "GOOGL", "TSLA", "NVDA"].map((symbol, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        ...resultItemStyle,
+                        border: "none",
+                        padding: "12px 16px",
+                        backgroundColor: "#f8f9fa",
+                        borderRadius: "8px",
+                        margin: "4px 0",
+                        fontSize: "14px"
+                      }}
+                      onMouseEnter={e => e.target.style.backgroundColor = "#e9ecef"}
+                      onMouseLeave={e => e.target.style.backgroundColor = "#f8f9fa"}
+                      onClick={() => handleStockClick({ symbol, companyName: symbol })}
+                    >
+                      <div>
+                        <div style={{ fontWeight: "600", color: "#113F67" }}>
+                          {symbol}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#6c757d" }}>
+                          {symbol}
                         </div>
                       </div>
-                    );
-                  })
+                    </div>
+                  ))
                 )}
               </div>
-            ) : filteredResults.length > 0 ? (
-              // Search Results
+            ) : loading ? (
+              <div style={{ padding: "40px 20px", textAlign: "center", color: "#6c757d" }}>
+                <div style={{ fontSize: "18px", marginBottom: "8px" }}>🔎</div>
+                <div style={{ fontWeight: "500" }}>Searching...</div>
+              </div>
+            ) : searchResults.length > 0 ? (
               <>
-                <div style={{ 
-                  padding: "16px 20px 8px", 
-                  color: "#6c757d", 
-                  fontSize: "14px", 
+                <div style={{
+                  padding: "16px 20px 8px",
+                  color: "#6c757d",
+                  fontSize: "14px",
                   fontWeight: "600",
                   borderBottom: "1px solid #f1f3f4"
                 }}>
-                  Search Results ({filteredResults.length})
+                  Search Results ({searchResults.length})
                 </div>
-                {filteredResults.map((stock, index) => (
+                {searchResults.map((stock, index) => (
                   <div
                     key={index}
                     style={resultItemStyle}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "white"}
+                    onMouseEnter={e => e.target.style.backgroundColor = "#f8f9fa"}
+                    onMouseLeave={e => e.target.style.backgroundColor = "white"}
                     onClick={() => handleStockClick(stock)}
                   >
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <div style={{ fontWeight: "600", fontSize: "16px", color: "#113F67" }}>
-                          {stock.symbol}
-                        </div>
-                        <div style={{ fontSize: "14px", color: "#6c757d" }}>
-                          {stock.companyName}
-                        </div>
+                    <div>
+                      <div style={{ fontWeight: "600", fontSize: "16px", color: "#113F67" }}>
+                        {stock.symbol}
                       </div>
-                      <div className="text-end">
-                        <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                          ${stock.price.toFixed(2)}
-                        </div>
+                      <div style={{ fontSize: "14px", color: "#6c757d" }}>
+                        {stock.companyName}
                       </div>
                     </div>
                   </div>
                 ))}
               </>
             ) : (
-              // No Results
-              <div style={{ 
-                padding: "40px 20px", 
-                textAlign: "center", 
-                color: "#6c757d" 
+              <div style={{
+                padding: "40px 20px",
+                textAlign: "center",
+                color: "#6c757d"
               }}>
                 <div style={{ fontSize: "18px", marginBottom: "8px" }}>📊</div>
                 <div style={{ fontWeight: "500" }}>No results found</div>

@@ -15,7 +15,6 @@ export default function SettingsPage() {
       <Sidebar />
       <div className="flex-grow-1 bg-white p-4">
         <TimePeriod />
-        <IndexDataRibbon />
     
         <Settings />
       </div>

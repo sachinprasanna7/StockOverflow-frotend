@@ -1,35 +1,37 @@
 import React from "react";
 import { Nav } from "react-bootstrap";
-import logo from "../assets/stock-overflow-logo.jpeg"; // Import image
+import { NavLink } from "react-router-dom";  // <-- import NavLink
+import logo from "../assets/stock-overflow-logo.jpeg"; 
 import bullBear from "../assets/bull-bear.png"; 
 
 export default function Sidebar() {
   const sidebarStyle = {
     width: "250px",
     backgroundColor: "#113F67",
-    height: "100vh",   // full viewport height
-    position: "fixed", // stays fixed when scrolling
+    height: "100vh", 
+    position: "fixed",
     top: 0,
     left: 0,
     display: "flex",
     flexDirection: "column",
-    zIndex: 1000       // ensures sidebar is above content if needed
+    zIndex: 1000
   };
-  
 
   const navLinkStyle = {
     color: "white",
     padding: "12px 16px",
     borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-    transition: "all 0.3s ease",
-    textDecoration: "none",
     fontSize: "14px",
-    fontWeight: "500"
+    fontWeight: "500",
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    transition: "all 0.3s ease",
   };
 
-  const navLinkHoverStyle = {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    paddingLeft: "20px"
+  const navLinkActiveStyle = {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingLeft: "20px",
   };
 
   const logoContainerStyle = {
@@ -45,17 +47,27 @@ export default function Sidebar() {
   };
 
   const bottomImageStyle = {
-  position: "sticky", 
-  bottom: 0,
-  left: 0,
-  width: "100%",       
-  height: "200px",  
-  backgroundColor: "rgba(255, 255, 255, 0.1)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center"
-};
+    position: "sticky",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "200px",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  };
 
+  // Navigation items with routes
+  const navItems = [
+    { name: "Dashboard", icon: "📊", path: "/dashboard" },
+    { name: "Portfolio", icon: "💼", path: "/portfolio" },
+    { name: "Orders", icon: "📋", path: "/order-history" },
+    { name: "Transact", icon: "💳", path: "/transact" },
+    { name: "SIPs", icon: "🔄", path: "/sip" },
+    { name: "Watchlist", icon: "👁️", path: "/watchlists" },
+    { name: "Settings", icon: "⚙️", path: "/settings" }
+  ];
 
   return (
     <div className="d-flex flex-column text-white p-3" style={sidebarStyle}>
@@ -78,37 +90,25 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-     {/* Scrollable Navigation Section */}
-<div style={{ flex: 1, overflowY: "auto", marginBottom: "20px" }}>
-  <Nav className="flex-column">
-    {[
-      { name: "Dashboard", icon: "📊" },
-      { name: "Portfolio", icon: "💼" },
-      { name: "Orders", icon: "📋" },
-      { name: "Transact", icon: "💳" },
-      { name: "SIPs", icon: "🔄" },
-      { name: "Watchlist", icon: "👁️" },
-      { name: "Settings", icon: "⚙️" }
-    ].map((item, index) => (
-      <Nav.Link
-        key={index}
-        href="#"
-        style={navLinkStyle}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = navLinkHoverStyle.backgroundColor;
-          e.target.style.paddingLeft = navLinkHoverStyle.paddingLeft;
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = "transparent";
-          e.target.style.paddingLeft = "16px";
-        }}
-      >
-        <span style={{ marginRight: "10px" }}>{item.icon}</span>
-        {item.name}
-      </Nav.Link>
-    ))}
-  </Nav>
-</div>
+      <div style={{ flex: 1, overflowY: "auto", marginBottom: "20px" }}>
+        <Nav className="flex-column">
+          {navItems.map(({ name, icon, path }, index) => (
+            <NavLink
+              key={index}
+              to={path}
+              style={({ isActive }) =>
+                isActive
+                  ? { ...navLinkStyle, ...navLinkActiveStyle }
+                  : navLinkStyle
+              }
+              end
+            >
+              <span style={{ marginRight: "10px" }}>{icon}</span>
+              {name}
+            </NavLink>
+          ))}
+        </Nav>
+      </div>
 
       {/* Bottom Image Placeholder */}
       <div style={bottomImageStyle}>
