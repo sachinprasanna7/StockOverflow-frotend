@@ -43,13 +43,14 @@ export default function OrderHistory() {
       
       <h2 
         style={{
-          textAlign: "center",
-          fontFamily: "'Mozilla Headline', sans-serif'",
-          fontWeight: "900",
-          fontSize: "2.9rem",
-          marginBottom: "30px",
-          color: "#113F67"
-        }}
+            color: "#113F67",
+            marginBottom: "30px",
+            fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue','sans-serif'`,
+            textAlign: "center",
+            fontWeight: "700",
+            fontSize: "2.5rem",
+          }}
       >
         Order History
       </h2>

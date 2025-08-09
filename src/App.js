@@ -11,9 +11,8 @@ export default function App() {
   return (
    //<Dashboard />
     //<OrderHistoryPage />
-    //<Watchlists />
-    //<PortfolioPage />
-    <SettingsPage />
-    //<PortfolioPage />
+    <Watchlists />
+    // <PortfolioPage />
+    // <SettingsPage />
   );
 }

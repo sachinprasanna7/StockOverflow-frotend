@@ -1,5 +1,6 @@
 import React from "react";
 
+
 export default function Settings() {
   const pageStyle = {
     marginLeft: "250px",
@@ -54,7 +55,20 @@ export default function Settings() {
 
   return (
     <div style={pageStyle}>
-      <h2 style={{ color: "#113F67", marginBottom: "30px" }}>Settings</h2>
+ <h2
+  style={{
+    color: "#113F67",
+    marginBottom: "30px",
+    fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue','sans-serif'`,
+    textAlign: "center",
+    fontWeight: "700",
+    fontSize: "2.5rem",
+  }}
+>
+  Settings
+</h2>
+
 
       {/* User Profile */}
       <div style={cardStyle}>
