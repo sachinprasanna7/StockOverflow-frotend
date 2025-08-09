@@ -1,4 +1,5 @@
 import React from "react";
+import "./StockLists.css"; // custom CSS file
 
 const data = {
   gainers: [
@@ -23,80 +24,78 @@ const data = {
 
 function StockCard({ title, stocks, category }) {
   const getCardStyle = () => {
-    switch(category) {
-      case 'gainers':
-        return 'border-success border-2';
-      case 'losers':
-        return 'border-danger border-2';
-      case 'trending':
-        return 'border-warning border-2';
-      default:
-        return 'border-light';
+    switch (category) {
+      case "gainers": return "border-success border-2";
+      case "losers": return "border-danger border-2";
+      case "trending": return "border-warning border-2";
+      default: return "border-light";
     }
   };
 
   const getTitleColor = () => {
-    switch(category) {
-      case 'gainers':
-        return 'text-success';
-      case 'losers':
-        return 'text-danger';
-      case 'trending':
-        return 'text-warning';
-      default:
-        return 'text-dark';
+    switch (category) {
+      case "gainers": return "text-success";
+      case "losers": return "text-danger";
+      case "trending": return "text-warning";
+      default: return "text-dark";
     }
   };
 
   const getIcon = () => {
-    switch(category) {
-      case 'gainers':
-        return '📈';
-      case 'losers':
-        return '📉';
-      case 'trending':
-        return '🔥';
-      default:
-        return '📊';
+    switch (category) {
+      case "gainers": return "📈";
+      case "losers": return "📉";
+      case "trending": return "🔥";
+      default: return "📊";
     }
   };
 
   return (
-    <div  style={{ marginLeft: "250px", padding: "20px" }}
-     className={`card h-100 shadow-sm ${getCardStyle()}`}>
+    <div style={{width : "100%"}} className={`card h-100 shadow-sm ${getCardStyle()}`}>
       <div className="card-body">
         <div className="d-flex align-items-center mb-3">
           <span className="fs-4 me-2">{getIcon()}</span>
           <h5 className={`card-title mb-0 ${getTitleColor()}`}>{title}</h5>
         </div>
-        
+
         <p className="card-subtitle text-muted small mb-3">
-          {category === 'trending' ? 'Most active stocks right now' : 'Stocks that moved the most today'}
+          {category === "trending"
+            ? "Most active stocks right now"
+            : "Stocks that moved the most today"}
         </p>
 
-        <div className="list-group list-group-flush">
+        <div className="list-group list-group-flush w-100 stock-list-container">
           {stocks.map((stock, i) => (
-            <div key={i} className="list-group-item px-0 py-3 border-0 border-bottom">
+            <div
+              key={i}
+              className="list-group-item py-3 border-0 border-bottom stock-item"
+            >
               <div className="d-flex justify-content-between align-items-start">
                 <div className="flex-grow-1">
                   <div className="d-flex align-items-center mb-1">
-                    <span className="fw-semibold text-dark me-2">{stock.name}</span>
-                    <span className="badge bg-light text-muted small">{stock.symbol}</span>
+                    <span className="fw-semibold text-dark me-2 stock-name">
+                      {stock.name}
+                    </span>
+                    <span className="badge bg-light text-muted small">
+                      {stock.symbol}
+                    </span>
                   </div>
-                  <div className="small text-muted">
-                    ${stock.price}
-                  </div>
+                  <div className="small text-muted">${stock.price}</div>
                 </div>
-                
+
                 <div className="text-end">
-                  <div className={`fw-bold small ${
-                    stock.change.startsWith('+') ? 'text-success' : 'text-danger'
-                  }`}>
+                  <div
+                    className={`fw-bold small ${
+                      stock.change.startsWith("+") ? "text-success" : "text-danger"
+                    }`}
+                  >
                     {stock.change}
                   </div>
-                  <div className={`small ${
-                    stock.changeValue.startsWith('+') ? 'text-success' : 'text-danger'
-                  }`}>
+                  <div
+                    className={`small ${
+                      stock.changeValue.startsWith("+") ? "text-success" : "text-danger"
+                    }`}
+                  >
                     {stock.changeValue}
                   </div>
                 </div>
@@ -107,7 +106,7 @@ function StockCard({ title, stocks, category }) {
 
         <div className="text-center mt-3">
           <button className="btn btn-outline-primary btn-sm">
-            View All {title.split(' ')[1]}
+            View All {title.split(" ")[1]}
           </button>
         </div>
       </div>
@@ -117,23 +116,23 @@ function StockCard({ title, stocks, category }) {
 
 export default function StockLists() {
   return (
-    <div className="container-fluid px-0">
-      <div className="row g-4">
-        <div className="col-md-4">
+    <div  style={{ marginLeft: "250px", padding: "20px" }} className="container-fluid px-0">
+      <div  className="row g-4 center pe-4">
+        <div style = {{width: "28%"}}className="col-md-4">
           <StockCard 
             title="Top Gainers" 
             stocks={data.gainers} 
             category="gainers"
           />
         </div>
-        <div className="col-md-4">
+        <div  style = {{width: "28%"}} className="col-md-4">
           <StockCard 
             title="Top Losers" 
             stocks={data.losers} 
             category="losers"
           />
         </div>
-        <div className="col-md-4">
+        <div  style = {{width: "28%"}} className="col-md-4">
           <StockCard 
             title="Trending Now" 
             stocks={data.trending} 

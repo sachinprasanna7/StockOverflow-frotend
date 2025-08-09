@@ -7,10 +7,10 @@ import Dashboard from "./pages/Dashboard";
 import OrderHistoryPage from "./pages/OrderHistoryPage";
 import Watchlists from "./pages/Watchlists";
 import SettingsPage from "./pages/SettingsPage";
-import PortfolioPage from "./pages/PortfolioPage";
+import PortfolioPage1 from "./pages/PortfolioPage1";
 import StocksPage from "./pages/StocksPage";
 import TransactPage from "./pages/TransactPage";
-import SipPage from "./pages/SipPage"; // Make sure this file exists
+import SipPage from "./pages/SipPage";
 
 export default function App() {
   return (
@@ -21,7 +21,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/order-history" element={<OrderHistoryPage />} />
         <Route path="/watchlists" element={<Watchlists />} />
-        <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/portfolio" element={<PortfolioPage1 />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/transact" element={<TransactPage />} />
         <Route path="/sip" element={<SipPage />} />

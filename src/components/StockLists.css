@@ -1,0 +1,18 @@
+/* Make the stock list inside card take full width */
+.stock-list-container {
+  width: 100%;
+}
+
+/* Each stock row should use full available space */
+.stock-item {
+  width: 100%;
+  padding-left: 0;   /* remove Bootstrap default padding */
+  padding-right: 0;  /* remove Bootstrap default padding */
+  white-space: normal;   /* allow text to wrap */
+  word-break: break-word; /* break long words if needed */
+}
+
+/* Make stock name a bit clearer */
+.stock-name {
+  font-size: 1rem;
+}
