@@ -30,6 +30,7 @@ export default function Watchlists() {
           title: item.watchlistName,
           isPositive: true,
           stocks: item.stocks.map((stock) => ({
+            symbol_id: stock.symbolId,
             name: stock.companyName,
             change: "+4.2",
           })),
@@ -42,6 +43,10 @@ export default function Watchlists() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log("Watchlists fetched:", watchlists);
+  }, [watchlists]);
 
   const handleAddWatchlist = async () => {
     if (newWatchlistName.trim().length < 3) {
