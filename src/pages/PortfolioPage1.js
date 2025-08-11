@@ -18,9 +18,6 @@ export default function OrderHistoryPage() {
       <Sidebar />
       <div className="flex-grow-1 bg-white p-4">
         <TimePeriod />
-        <IndexDataRibbon />
-        {/* <WelcomeText /> */}
-        {/* <SearchOrders /> */}
         <PortfolioCard/>
        
       </div>

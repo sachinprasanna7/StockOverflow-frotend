@@ -5,22 +5,9 @@ const app = express();
 
 app.use(cors());
 
-// 1️⃣ First API — Get stock prices
-app.get('/api/stocks/:ticker', async (req, res) => {
-  const ticker = req.params.ticker;
+//Proxy Server
 
-  try {
-    const response = await axios.get(
-      `https://marketdata.neueda.com/API/StockFeed/GetStockPricesForSymbol/${ticker}`
-    );
-    res.json(response.data);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: 'Error fetching stock prices' });
-  }
-});
-
-
+// First API — Get stock prices
 app.get('/api/currentStockValue/:ticker', async (req, res) => {
   const ticker = req.params.ticker;
 
@@ -35,12 +22,12 @@ app.get('/api/currentStockValue/:ticker', async (req, res) => {
   }
 });
 
-app.listen(4000, () => {
-  console.log('Proxy server running on port 4000');
-});
-app.get('/api/prevStockValue/:symbol', async (req, res) => {
-  const symbol = req.params.symbol;
-  const periodNumber = req.query.periodNumber;  // e.g. ?periodNumber=5
+
+
+// Second API — Get previous stock value (In Period)
+app.get('/api/prevStockValue/:ticker', async (req, res) => {
+  const ticker = req.params.ticker;
+  const periodNumber = req.query.periodNumber; 
 
   if (!periodNumber) {
     return res.status(400).json({ error: 'periodNumber query parameter is required' });
@@ -48,7 +35,7 @@ app.get('/api/prevStockValue/:symbol', async (req, res) => {
 
   try {
     const response = await axios.get(
-      `https://marketdata.neueda.com/API/StockFeed/GetOpenCloseMinMaxForSymbolAndPeriodNumber/${symbol}?PeriodNumber=${periodNumber}`
+      `https://marketdata.neueda.com/API/StockFeed/GetOpenCloseMinMaxForSymbolAndPeriodNumber/${ticker}?PeriodNumber=${periodNumber}`
     );
     res.json(response.data);
   } catch (error) {
@@ -56,6 +43,7 @@ app.get('/api/prevStockValue/:symbol', async (req, res) => {
     res.status(500).json({ error: 'Error fetching stock data' });
   }
 });
+
 
 app.listen(4000, () => {
   console.log('Proxy server running on port 4000');

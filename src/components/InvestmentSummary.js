@@ -1,167 +1,263 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+
+//Styles 
+const containerStyle = {
+  background: "linear-gradient(135deg, #113F67 0%, #1a5a8a 100%)",
+  borderRadius: "16px",
+  padding: "32px",
+  marginBottom: "24px",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
+  position: "relative",
+  overflow: "hidden"
+};
+
+const backgroundPattern = {
+  position: "absolute",
+  top: 0,
+  right: 0,
+  width: "200px",
+  height: "200px",
+  background: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
+  backgroundSize: "20px 20px",
+  opacity: 0.3
+};
+
+const statCardStyle = {
+  backgroundColor: "rgba(255, 255, 255, 0.1)",
+  backdropFilter: "blur(10px)",
+  borderRadius: "12px",
+  padding: "24px 20px",
+  border: "1px solid rgba(255, 255, 255, 0.2)",
+  transition: "all 0.3s ease",
+  position: "relative",
+  minWidth: "200px"
+};
+
+const labelStyle = {
+  color: "rgba(255, 255, 255, 0.8)",
+  fontSize: "14px",
+  fontWeight: "500",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: "8px"
+};
+
+const valueStyle = {
+  color: "white",
+  fontSize: "28px",
+  fontWeight: "700",
+  marginBottom: "4px",
+  lineHeight: "1.2"
+};
+
+const subValueStyle = {
+  fontSize: "14px",
+  fontWeight: "500",
+  marginTop: "4px"
+};
+
+const positiveStyle = {
+  color: "#4ade80"
+};
+
+const negativeStyle = {
+  color: "#ef4444"
+};
+
+const iconStyle = {
+  position: "absolute",
+  top: "16px",
+  right: "16px",
+  fontSize: "20px",
+  opacity: 0.6
+};
+
+function getPeriodFromTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+  const period = Math.floor(totalSeconds / 20) + 1;
+  return period;
+}
+
 
 export default function InvestmentSummary() {
-  const [totalInvested, setTotalInvested] = useState(0);
-  const [currentValue, setCurrentValue] = useState(0);
-  const [totalReturns, setTotalReturns] = useState(0);
-  const [periodChange, setPeriodChange] = useState({ value: 0, percent: 0 });
-  const [holdings, setHoldings] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Helper to get current period number
-  function getCurrentPeriod() {
-    const now = new Date();
-    const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    return Math.floor(totalSeconds / 20) + 1;
-  }
-
-  // Store period start prices for change calculation
-  const periodStartPricesRef = useRef({});
-
-  // Fetch all required data
-  useEffect(() => {
-    let interval;
-    async function fetchAllData() {
-      setLoading(true);
-      try {
-        // 1. Get total invested
-        const investedRes = await axios.get("http://localhost:8080/useraccount/getStockInvestmentsMoney", {
-          params: { userId: 1 }
-        });
-        setTotalInvested(investedRes.data.stock_investments_money || 0);
-
-        // 2. Get portfolio holdings
-        const holdingsRes = await axios.get("http://localhost:8080/portfolio/all");
-        const holdingsData = holdingsRes.data || [];
-        setHoldings(holdingsData);
-
-        // 3. For each holding, get latest price and period start price
-        let totalCurrent = 0;
-        let totalPeriodStart = 0;
-        let periodPrices = {};
-
-        const currentPeriod = getCurrentPeriod();
-
-        await Promise.all(
-          holdingsData.map(async (holding) => {
-            // Get symbol for this symbolId
-            const stockInfoRes = await axios.get(`http://localhost:8080/api/stock/${holding.symbolId}`);
-            const symbol = stockInfoRes.data.symbol;
-
-            // Get latest price
-            const latestPriceRes = await axios.get(
-              `https://marketdata.neueda.com/API/StockFeed/GetStockPricesForSymbol/${symbol}`
-            );
-            const latestPrice = latestPriceRes.data[0]?.price || 0;
-
-            // Get period start price (first price for current period)
-            const periodStartRes = await axios.get(
-              `https://marketdata.neueda.com/API/StockFeed/GetStockPricesForSymbol/${symbol}?HowManyValues=20`
-            );
-            const periodStartPriceObj = periodStartRes.data.find(
-              (item) => item.periodNumber === currentPeriod
-            );
-            const periodStartPrice = periodStartPriceObj ? periodStartPriceObj.price : latestPrice;
-            periodPrices[symbol] = periodStartPrice;
-
-            totalCurrent += latestPrice * holding.stockQuantity;
-            totalPeriodStart += periodStartPrice * holding.stockQuantity;
-          })
-        );
-
-        setCurrentValue(totalCurrent);
-        setTotalReturns(totalCurrent - (investedRes.data.stock_investments_money || 0));
-        setPeriodChange({
-          value: totalCurrent - totalPeriodStart,
-          percent: totalPeriodStart > 0 ? ((totalCurrent - totalPeriodStart) / totalPeriodStart) * 100 : 0
-        });
-      } catch (err) {
-        setTotalInvested(0);
-        setCurrentValue(0);
-        setTotalReturns(0);
-        setPeriodChange({ value: 0, percent: 0 });
-      } finally {
-        setLoading(false);
+    const [portfolio, setPortfolio] = useState([]);
+    const [stocksData, setStocksData] = useState([]);
+    const [currentPrices, setCurrentPrices] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [periodStartValue, setPeriodStartValue] = useState(null);
+    let currentPeriodRef = useRef(-1);
+  
+    // Add debug logging
+    useEffect(() => {
+      console.log("Portfolio data:", portfolio);
+      console.log("Stocks data:", stocksData);
+      console.log("Current prices:", currentPrices);
+    }, [portfolio, stocksData, currentPrices]);
+  
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          setLoading(true);
+          setError(null);
+  
+          // 1. Fetch portfolio holdings
+          console.log("Fetching portfolio...");
+          const portfolioRes = await fetch("http://localhost:8080/portfolio/all");
+          if (!portfolioRes.ok) {
+            throw new Error(`Portfolio fetch failed: ${portfolioRes.status}`);
+          }
+          const portfolioData = await portfolioRes.json();
+          console.log("Portfolio fetched:", portfolioData);
+          setPortfolio(portfolioData);
+  
+          // Check if portfolio is empty
+          if (!portfolioData || portfolioData.length === 0) {
+            console.log("No portfolio data found");
+            setLoading(false);
+            return;
+          }
+  
+          // 2. Extract unique symbolIds
+          const symbolIds = [...new Set(portfolioData.map((item) => item.symbolId))];
+          console.log("Symbol IDs:", symbolIds);
+  
+          // 3. Fetch stock details by symbolId
+          const stockDetailsFetches = symbolIds.map(async (id) => {
+            try {
+              const res = await fetch(`http://localhost:8080/api/stock/${id}`);
+              if (!res.ok) {
+                console.error(`Failed to fetch stock ${id}: ${res.status}`);
+                return null;
+              }
+              const data = await res.json();
+              console.log(`Stock data for ${id}:`, data);
+              return { ...data, symbolId: id }; // Ensure symbolId is included
+            } catch (err) {
+              console.error(`Error fetching stock ${id}:`, err);
+              return null;
+            }
+          });
+  
+          const stocksDetails = await Promise.all(stockDetailsFetches);
+          const validStocks = stocksDetails.filter(stock => stock !== null);
+          console.log("Valid stocks:", validStocks);
+          setStocksData(validStocks);
+  
+        } catch (err) {
+          console.error("Fetch error:", err);
+          setError(err.message || "Failed to load data");
+        } finally {
+          setLoading(false);
+        }
       }
-    }
-
-    fetchAllData();
-    interval = setInterval(fetchAllData, 20000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const containerStyle = {
-    background: "linear-gradient(135deg, #113F67 0%, #1a5a8a 100%)",
-    borderRadius: "16px",
-    padding: "32px",
-    marginBottom: "24px",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
-    position: "relative",
-    overflow: "hidden"
-  };
-
-  const backgroundPattern = {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: "200px",
-    height: "200px",
-    background: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
-    backgroundSize: "20px 20px",
-    opacity: 0.3
-  };
-
-  const statCardStyle = {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
-    padding: "24px 20px",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    transition: "all 0.3s ease",
-    position: "relative",
-    minWidth: "200px"
-  };
-
-  const labelStyle = {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: "14px",
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    marginBottom: "8px"
-  };
-
-  const valueStyle = {
-    color: "white",
-    fontSize: "28px",
-    fontWeight: "700",
-    marginBottom: "4px",
-    lineHeight: "1.2"
-  };
-
-  const subValueStyle = {
-    fontSize: "14px",
-    fontWeight: "500",
-    marginTop: "4px"
-  };
-
-  const positiveStyle = {
-    color: "#4ade80"
-  };
-
-  const negativeStyle = {
-    color: "#ef4444"
-  };
-
-  const iconStyle = {
-    position: "absolute",
-    top: "16px",
-    right: "16px",
-    fontSize: "20px",
-    opacity: 0.6
-  };
+  
+      fetchData();
+    }, []);
+  
+    useEffect(() => {
+      if (!stocksData || stocksData.length === 0) return;
+  
+      let intervalId;
+  
+      const fetchCurrentPrices = async () => {
+        try {
+          const symbols = stocksData.map(stock => stock.symbol).filter(Boolean);
+          console.log("Fetching prices for symbols:", symbols);
+  
+          if (symbols.length === 0) return;
+  
+          const priceFetches = symbols.map(async symbol => {
+            try {
+              const res = await fetch(`http://localhost:4000/api/currentStockValue/${symbol}`);
+              if (!res.ok) {
+                console.error(`Failed to fetch price for ${symbol}: ${res.status}`);
+                return { symbol, price: 0 };
+              }
+              const data = await res.json();
+              return {
+                symbol,
+                price: data?.[0]?.price ?? 0
+              };
+            } catch (err) {
+              console.error(`Error fetching price for ${symbol}:`, err);
+              return { symbol, price: 0 };
+            }
+          });
+  
+          const pricesArray = await Promise.all(priceFetches);
+          console.log("Prices fetched:", pricesArray);
+  
+          const priceMap = pricesArray.reduce((acc, { symbol, price }) => {
+            acc[symbol] = price;
+            return acc;
+          }, {});
+  
+          setCurrentPrices(priceMap);
+  
+          // get the current period
+          const runningPeriod = getPeriodFromTime();
+  
+          if (currentPeriodRef.current === -1 || currentPeriodRef.current < runningPeriod) {
+            const totalCurrent = portfolio.reduce((sum, item) => {
+              const stock = stocksData.find(s => s.symbolId === item.symbolId);
+              const symbol = stock?.symbol;
+              if (!symbol) return sum;
+  
+              const currentPrice = priceMap[symbol] || 0;
+              return sum + item.stockQuantity * currentPrice;
+            }, 0);
+  
+            setPeriodStartValue(totalCurrent);
+            currentPeriodRef.current = runningPeriod;
+          }
+  
+        } catch (err) {
+          console.error("Error fetching prices:", err);
+        }
+      };
+  
+      fetchCurrentPrices();
+  
+      // Fetch every 3s
+      intervalId = setInterval(fetchCurrentPrices, 3000);
+  
+      return () => clearInterval(intervalId);
+    }, [stocksData, portfolio]);
+  
+    if (loading) return <div>Loading portfolio...</div>;
+    if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
+  
+    // Build symbolId => stockDetail map for quick lookup - FIXED
+    const symbolIdToStock = {};
+    stocksData.forEach((stock) => {
+      if (stock && stock.symbolId !== undefined) {
+        symbolIdToStock[stock.symbolId] = stock;
+      }
+    });
+  
+    console.log("symbolIdToStock mapping:", symbolIdToStock);
+  
+    // Calculate totals
+    const totalInvested = portfolio.reduce((sum, item) => sum + item.averagePrice * item.stockQuantity, 0);
+  
+    const totalCurrent = portfolio.reduce((sum, item) => {
+      const stock = stocksData.find(s => s.symbolId === item.symbolId);
+      const symbol = stock?.symbol;
+      if (!symbol) return sum;
+  
+      const currentPrice = currentPrices[symbol] || 0;
+      return sum + item.stockQuantity * currentPrice;
+    }, 0);
+  
+    const returns = totalCurrent - totalInvested;
+    const periodChange = periodStartValue !== null ? totalCurrent - periodStartValue : 0;
+    const periodChangePercent = periodStartValue ? ((periodChange / periodStartValue) * 100).toFixed(2) : "0.00";
 
   return (
     <div style={Object.assign({ marginLeft: "250px", padding: "20px" }, containerStyle)}>
@@ -179,37 +275,37 @@ export default function InvestmentSummary() {
             {loading ? "..." : `$${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
           </div>
           <div style={{ ...subValueStyle, color: "rgba(255, 255, 255, 0.6)" }}>
-            Principal amount
+            Principal Amount
           </div>
         </div>
         {/* Current Value */}
         <div style={statCardStyle}>
           <div style={labelStyle}>Current Value</div>
           <div style={valueStyle}>
-            {loading ? "..." : `$${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            {loading ? "..." : `$${totalCurrent.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
           </div>
           <div style={{ ...subValueStyle, color: "rgba(255, 255, 255, 0.6)" }}>
-            Market value
+            Market Value
           </div>
         </div>
         {/* Returns */}
         <div style={statCardStyle}>
           <div style={labelStyle}>Total Returns</div>
-          <div style={{ ...valueStyle, color: totalReturns >= 0 ? "#4ade80" : "#ef4444" }}>
-            {loading ? "..." : `${totalReturns >= 0 ? "+" : ""}$${totalReturns.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          <div style={{ ...valueStyle, color: returns >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${returns >= 0 ? "+" : ""}$${returns.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
           </div>
-          <div style={{ ...subValueStyle, color: totalReturns >= 0 ? "#4ade80" : "#ef4444" }}>
-            {loading ? "..." : `${totalReturns >= 0 ? "+" : ""}${((totalReturns / (totalInvested || 1)) * 100).toFixed(2)}% ${totalReturns >= 0 ? "↗️" : "↘️"}`}
+          <div style={{ ...subValueStyle, color: returns >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${returns >= 0 ? "+" : ""}${((returns / (totalInvested || 1)) * 100).toFixed(2)}% ${returns >= 0 ? "↗️" : "↘️"}`}
           </div>
         </div>
         {/* Period's Change */}
         <div style={statCardStyle}>
           <div style={labelStyle}>Period's Change</div>
-          <div style={{ ...valueStyle, color: periodChange.value >= 0 ? "#4ade80" : "#ef4444" }}>
-            {loading ? "..." : `${periodChange.value >= 0 ? "+" : ""}$${periodChange.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          <div style={{ ...valueStyle, color: periodChange >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${periodChange >= 0 ? "+" : ""}$${periodChange.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
           </div>
-          <div style={{ ...subValueStyle, color: periodChange.value >= 0 ? "#4ade80" : "#ef4444" }}>
-            {loading ? "..." : `${periodChange.value >= 0 ? "+" : ""}${periodChange.percent.toFixed(2)}% ${periodChange.value >= 0 ? "↗️" : "↘️"}`}
+          <div style={{ ...subValueStyle, color: periodChange >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${periodChange >= 0 ? "+" : ""}${periodChangePercent}% ${periodChange >= 0 ? "↗️" : "↘️"}`}
           </div>
         </div>
       </div>
