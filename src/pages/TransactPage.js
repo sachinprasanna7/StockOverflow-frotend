@@ -37,8 +37,8 @@ export default function TransactPage() {
 
       // Calculate total invested amount
       const totalInvested = portfolioData.reduce((sum, stock) => {
-        console.log('Stock:', stock);
-        return sum + (stock.moneyInvested || 0);
+        // console.log('Stock:', stock);
+        return sum + (stock.averagePrice || 0);
       }, 0);
 
       setStockInvestments({
@@ -62,6 +62,7 @@ export default function TransactPage() {
         amount: response.data.trading_money,
         loading: false
       });
+      console.log('Trading Balance:', response.data.trading_money);
     } catch (error) {
       console.error('Error fetching balance:', error);
       setTradingBalance(prev => ({ ...prev, loading: false }));

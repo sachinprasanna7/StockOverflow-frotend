@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-
-export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.25 }) {
+import axios from "axios";
+import 'bootstrap/dist/css/bootstrap.min.css';
+export default function StockManipulation({ symbol, currentPrice }) {
     const [investmentType, setInvestmentType] = useState('SIP'); // 'SIP' or 'Delivery'
     const [showBuyForm, setShowBuyForm] = useState(false);
     const [showSellForm, setShowSellForm] = useState(false);
@@ -8,9 +9,16 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
     const [showSIPForm, setShowSIPForm] = useState(false);
     const [quantity, setQuantity] = useState('');
     const [sipAmount, setSipAmount] = useState('');
+    const [holdings, setHoldings] = useState(null);
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
     const [selectedWatchlists, setSelectedWatchlists] = useState([]);
+    const [tradingBalance, setTradingBalance] = useState({
+        amount: 0,
+        loading: false,
+      });
+      const [portfolio, setPortfolio] = useState(null);
+      console.log("symbol:", symbol);
     
     // Mock user data - in real app, this would come from API/context
     const [userBalance, setUserBalance] = useState(10000); // User's available balance
@@ -52,6 +60,68 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
         }
         return newErrors;
     };
+    // Fetch trading balance
+    useEffect(() => {
+    const fetchTradingBalance = async () => {
+        try {
+          setTradingBalance((prev) => ({ ...prev, loading: true }));
+          const response = await axios.get(
+            "http://localhost:8080/useraccount/getTradingMoney?userId=1"
+          );
+          setTradingBalance({
+            amount: response.data.trading_money,
+            loading: false,
+          });
+          console.log("Trading Balance:", response.data.trading_money);
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+          setTradingBalance((prev) => ({ ...prev, loading: false }));
+        }
+      };
+  
+      fetchTradingBalance();
+    }, []);
+
+
+    useEffect(() => {
+        async function fetchPortfolio() {
+          try {
+            const portfolioData = await getPortfolioBySymbol(symbol);
+            setHoldings(portfolioData.stockQuantity); // or whatever field you want
+          } catch (err) {
+            setErrors(err.message);
+          }
+        }
+    
+        if (symbol) {
+          fetchPortfolio();
+        }
+      }, [symbol]);
+    
+      async function getPortfolioBySymbol(symbol) {
+        // Your async function as defined before
+        try {
+          const stockRes = await fetch(`http://localhost:8080/api/stock/symbol/${symbol}`);
+          if (!stockRes.ok) throw new Error(`Failed to fetch stock info for ${symbol}`);
+          const stockData = await stockRes.json();
+    
+          if (!stockData || stockData.length === 0) {
+            throw new Error(`No stock data found for symbol: ${symbol}`);
+          }
+    
+          const symbolId = stockData.symbol_id;
+    
+          const portfolioRes = await fetch(`http://localhost:8080/portfolio/${symbolId}`);
+          if (!portfolioRes.ok) throw new Error(`Failed to fetch portfolio for symbolId: ${symbolId}`);
+    
+          const portfolioData = await portfolioRes.json();
+    
+          return portfolioData;
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      }
 
     const handleSIPBuy = () => {
         // Validate investment amount
@@ -188,8 +258,13 @@ export default function StockManipulation({ symbol = "AAPL", currentPrice = 150.
                 borderRadius: '6px',
                 fontSize: '0.9rem'
             }}>
-                <span><strong>Balance:</strong> ${userBalance.toFixed(2)}</span>
-                <span><strong>Holdings:</strong> {userHoldings} shares</span>
+                <span> <strong style={{ textAlign: "right", fontSize: "1.2rem", marginBottom: "10px" }}>Balance: </strong>
+                    {tradingBalance.loading
+                        ? "Loading balance..."
+                        : `  $${tradingBalance.amount.toFixed(2)}`}
+                    </span>
+                
+                <span><strong>Holdings:</strong> {holdings} shares</span>
                 <span><strong>Current Price:</strong> ${currentPrice.toFixed(2)}</span>
             </div>
 

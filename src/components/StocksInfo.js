@@ -88,9 +88,8 @@
 
 
 
-
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; 
+import { useParams } from "react-router-dom";
 import WebFont from "webfontloader";
 import axios from "axios";
 import StockChart from "../cards/StockChart";
@@ -103,22 +102,27 @@ WebFont.load({
 });
 
 export default function StocksInfo({ selectedStock }) {
-  const { symbol } = useParams(); // from URL, e.g. "cpgx"
+  const { symbol } = useParams();
   const symbolLow = symbol.toLowerCase();
 
   const [stockData, setStockData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch stock details from external API
+  const [tradingBalance, setTradingBalance] = useState({
+    amount: 0,
+    loading: false,
+  });
+
+  // Fetch stock details
   useEffect(() => {
     const fetchStockDetails = async () => {
       try {
-          const res = await axios.get(
-            `http://localhost:4000/api/stocks/${symbolLow}`
-          );
+        const res = await axios.get(
+          ` http://localhost:4000/api/stocks/${symbolLow}`
+        );
         if (res.data && res.data.length > 0) {
-          setStockData(res.data[0]); 
+          setStockData(res.data[0]);
         } else {
           setError("No stock data found");
         }
@@ -133,24 +137,44 @@ export default function StocksInfo({ selectedStock }) {
     fetchStockDetails();
   }, [symbolLow]);
 
-  // Track current price separately so it can be updated live
-  const [currentPrice, setCurrentPrice] = useState(null);
+  // Fetch trading balance
+  useEffect(() => {
+    const fetchTradingBalance = async () => {
+      try {
+        setTradingBalance((prev) => ({ ...prev, loading: true }));
+        const response = await axios.get(
+          "http://localhost:8080/useraccount/getTradingMoney?userId=1"
+        );
+        setTradingBalance({
+          amount: response.data.trading_money,
+          loading: false,
+        });
+        console.log("Trading Balance:", response.data.trading_money);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        setTradingBalance((prev) => ({ ...prev, loading: false }));
+      }
+    };
 
-  // Initialize current price when API loads
+    fetchTradingBalance();
+  }, []);
+  useEffect(() => {
+    console.log("Trading Balance updated:", tradingBalance.amount);
+  }, [tradingBalance.amount]);
+
+  // Track current price for live updates
+  const [currentPrice, setCurrentPrice] = useState(null);
   useEffect(() => {
     if (stockData?.price !== undefined) {
       setCurrentPrice(stockData.price);
     }
   }, [stockData]);
-
-  // Update current price when selectedStock changes (if passed as prop)
   useEffect(() => {
     if (selectedStock?.price !== undefined) {
       setCurrentPrice(selectedStock.price);
     }
   }, [selectedStock]);
 
-  // Handler for StockChart live price updates
   const handlePriceUpdate = (newPrice) => {
     setCurrentPrice(newPrice);
   };
@@ -162,7 +186,6 @@ export default function StocksInfo({ selectedStock }) {
       </div>
     );
   }
-
   if (error) {
     return (
       <div style={{ marginLeft: "250px", padding: "20px", color: "red" }}>
@@ -180,6 +203,15 @@ export default function StocksInfo({ selectedStock }) {
         boxSizing: "border-box",
       }}
     >
+      {/* Balance */}
+      <div style={{ textAlign: "right", fontSize: "1.2rem", marginBottom: "10px" }}>
+  {tradingBalance.loading
+    ? "Loading balance..."
+    : `Trading Balance: $${tradingBalance.amount.toFixed(2)}`}
+</div>
+
+
+      {/* Stock Title */}
       <h2
         style={{
           textAlign: "center",
@@ -192,34 +224,19 @@ export default function StocksInfo({ selectedStock }) {
       >
         {stockData.companyName} ({stockData.symbol.toUpperCase()})
       </h2>
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "2.2rem",
-          fontWeight: "600",
-        }}
-      >
-        <p
-          style={{
-            color: "#113F67",
-          }}
-        >
+
+      {/* Price */}
+      <div style={{ textAlign: "center", fontSize: "2.2rem", fontWeight: "600" }}>
+        <p style={{ color: "#113F67" }}>
           Price: ${currentPrice?.toFixed(2)}
         </p>
       </div>
 
-      {/* Stock Chart Component */}
-      <StockChart
-        symbol={stockData.symbol}
-        onPriceUpdate={handlePriceUpdate}
-      />
+      {/* Stock Chart */}
+      <StockChart symbol={stockData.symbol} onPriceUpdate={handlePriceUpdate} />
 
       {/* Buy/Sell UI */}
-      <StockManipulation
-        symbol={stockData.symbol}
-        currentPrice={currentPrice}
-      />
+      <StockManipulation symbol={stockData.symbol} currentPrice={currentPrice} />
     </div>
   );
 }
-

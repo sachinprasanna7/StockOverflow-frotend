@@ -110,12 +110,12 @@ portfolio.forEach(item => {
   if (!investedMap[symbol]) {
     investedMap[symbol] = 0;
   }
-  investedMap[symbol] += item.moneyInvested * item.stockQuantity;
+  investedMap[symbol] += item.averagePrice * item.stockQuantity;
 });
 console.log("Invested Map:", investedMap);
 
-  // Calculate total invested (sum of moneyInvested)
-  const totalInvested = portfolio.reduce((sum, item) => sum + item.moneyInvested*item.stockQuantity, 0);
+  // Calculate total invested (sum of averagePrice)
+  const totalInvested = portfolio.reduce((sum, item) => sum + item.averagePrice*item.stockQuantity, 0);
 
   // Calculate total current value (sum of stockQuantity * current price)
   const totalCurrent = portfolio.reduce((sum, item) => {
@@ -162,7 +162,7 @@ console.log("Invested Map:", investedMap);
 
           const symbol = stockDetail.symbol;
           const name = stockDetail.name || symbol; // fallback if name missing
-          const investedAmt = item.moneyInvested;
+          const investedAmt = item.averagePrice;
           const currentPrice = currentPrices[symbol] || 0;
           const currentAmt = currentPrice * item.stockQuantity;
           const profit = currentAmt - investedAmt;
@@ -194,10 +194,10 @@ console.log("Invested Map:", investedMap);
       {stocksData.map((stock, idx) => {
         const symbol = stock.symbol;
         const stock_id = stock.symbol_id;
-        let moneyInvested = 0;
+        let averagePrice = 0;
         {portfolio.map((item) => {
           if (item.symbolId === stock_id) { 
-            moneyInvested = item.moneyInvested ;
+            averagePrice = item.averagePrice ;
           }
         })}
         const name = stock.name || symbol;
@@ -205,7 +205,7 @@ console.log("Invested Map:", investedMap);
         const currentPrice = currentPrices[symbol] || 0;
 
         const investedObj = portfolio.find((p) => symbolIdToStock[p.symbolId]?.symbol === symbol);
-        const invested = investedObj ? investedObj.moneyInvested : 0;
+        const invested = investedObj ? investedObj.averagePrice : 0;
 
 
         return (
@@ -217,12 +217,12 @@ console.log("Invested Map:", investedMap);
             </div>
             <div className="price-invested-right">
             <div className="current-price"
-                style={{ color: currentPrice > moneyInvested ? "green" : "red" }}
+                style={{ color: currentPrice > averagePrice ? "green" : "red" }}
               >
                 ₹{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="money-invested">
-                (₹{moneyInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                (₹{averagePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
               </div>        
                   </div>
           </div>
