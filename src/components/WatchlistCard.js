@@ -11,7 +11,7 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
     axios.get("http://localhost:8080/api/stock/getStocks")
       .then(res => {
         setStockList(res.data);
-        console.log("Stock list fetched:", res.data);
+        
       })
       .catch(err => console.error("Error fetching stock list:", err));
   }, []);
