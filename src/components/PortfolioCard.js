@@ -44,51 +44,49 @@ export default function PortfolioPage() {
     fetchData();
   }, []);
   useEffect(() => {
+    if (!stocksData || stocksData.length === 0) return;
+  
     let intervalId;
   
-    async function fetchCurrentPrices() {
+    const fetchCurrentPrices = async () => {
       try {
-        // Extract symbols from stocksData
         const symbols = stocksData.map(stock => stock.symbol);
   
-        // Fetch prices one by one (like your existing logic)
+        if (symbols.length === 0) return;
+  
         const priceFetches = symbols.slice(1).map(symbol =>
-          fetch(`http://localhost:4000/api/stocks/${symbol}`).then(res => {
-            if (!res.ok) throw new Error(`Failed to fetch price for ${symbol}`);
-            return res.json().then(data => ({ symbol, data }));
-          })
+          fetch(`http://localhost:4000/api/stocks/${symbol}`)
+            .then(res => {
+              if (!res.ok) throw new Error(`Failed to fetch price for ${symbol}`);
+              return res.json();
+            })
+            .then(data => ({
+              symbol,
+              price: data?.[0]?.price ?? 0
+            }))
         );
   
         const pricesArray = await Promise.all(priceFetches);
   
-        const priceMap = {};
-        pricesArray.forEach(({ symbol, data }) => {
-          if (data && data.length > 0) {
-            priceMap[symbol] = data[0].price;
-          } else {
-            priceMap[symbol] = 0;
-          }
-        });
+        const priceMap = pricesArray.reduce((acc, { symbol, price }) => {
+          acc[symbol] = price;
+          return acc;
+        }, {});
   
         setCurrentPrices(priceMap);
       } catch (err) {
         console.error("Error fetching prices:", err);
       }
-    }
+    };
   
-    if (stocksData.length > 0) {
-      // Initial fetch
-      fetchCurrentPrices();
+    fetchCurrentPrices();
   
-      // Set interval to fetch every 20ms
-      intervalId = setInterval(fetchCurrentPrices, 20);
-    }
+    // Fetch every 20s (20ms is way too fast for APIs)
+    intervalId = setInterval(fetchCurrentPrices, 1000);
   
-    // Cleanup on unmount
     return () => clearInterval(intervalId);
   }, [stocksData]);
   
-
   if (loading) return <div>Loading portfolio...</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
