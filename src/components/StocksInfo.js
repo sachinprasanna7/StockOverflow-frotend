@@ -134,8 +134,12 @@ export default function StocksInfo({ selectedStock }) {
       }
     };
 
-    fetchStockDetails();
-    
+    //set a timer to call every 2 seconds
+    const interval = setInterval(() => {
+      fetchStockDetails();
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, [symbolLow]);
 
   // Fetch trading balance
@@ -237,7 +241,7 @@ export default function StocksInfo({ selectedStock }) {
       <StockChart symbol={stockData.symbol} onPriceUpdate={handlePriceUpdate} />
 
       {/* Buy/Sell UI */}
-      <StockManipulation symbol={stockData.symbol} currentPrice={currentPrice} />
+      <StockManipulation symbol={stockData.symbol} companyName={stockData.companyName} currentPrice={currentPrice} />
     </div>
   );
 }

@@ -1,0 +1,248 @@
+/* StockManipulation.css */
+
+.stock-manipulation-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.stock-manipulation-title {
+  margin: 0 0 20px 0;
+  color: #113F67;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.user-info-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.balance-text {
+  text-align: right;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.investment-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.investment-toggle-wrapper {
+  display: flex;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.investment-toggle-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.investment-toggle-btn.active {
+  background-color: #113F67;
+  color: white;
+}
+
+.investment-toggle-btn.inactive {
+  background-color: transparent;
+  color: #6b7280;
+}
+
+.success-message {
+  padding: 12px;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.error-container {
+  padding: 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.action-buttons-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-buy {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-buy:hover {
+  background-color: #218838;
+}
+
+.btn-sell {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-sell:hover {
+  background-color: #c82333;
+}
+
+.btn-watchlist {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-watchlist:hover {
+  background-color: #5a6268;
+}
+
+.form-container {
+  margin-top: 25px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.form-title {
+  color: #113F67;
+  margin-bottom: 15px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-info {
+  margin-bottom: 15px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-confirm {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-confirm.sell {
+  background-color: #dc3545;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.watchlist-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: white;
+}
+
+.watchlist-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.watchlist-item.selected {
+  background-color: #e3f2fd;
+}
+
+.watchlist-item:hover:not(.selected) {
+  background-color: #f5f5f5;
+}
+
+.watchlist-checkbox {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.watchlist-name {
+  font-weight: 600;
+  color: #113F67;
+}
+
+.watchlist-description {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.selected-count {
+  margin-top: 10px;
+  padding: 8px;
+  background-color: #d4edda;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #155724;
+}
+
+.btn-disabled {
+  opacity: 0.6;
+}
+
+.remaining-amount {
+  color: #6c757d;
+}

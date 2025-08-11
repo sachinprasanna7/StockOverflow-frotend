@@ -30,21 +30,14 @@ export default function TransactPage() {
   const fetchStockInvestments = async () => {
     try {
       setStockInvestments(prev => ({ ...prev, loading: true }));
-      const portfolioRes = await fetch('http://localhost:8080/portfolio/all');
-      const portfolioData = await portfolioRes.json();
-      setPortfolio(portfolioData);
-      console.log('Portfolio Data:', portfolioData);
-
-      // Calculate total invested amount
-      const totalInvested = portfolioData.reduce((sum, stock) => {
-        // console.log('Stock:', stock);
-        return sum + (stock.averagePrice || 0);
-      }, 0);
+      const stockInvestmentsRes = await fetch('http://localhost:8080/useraccount/getStockInvestmentsMoney?userId=1');
+      const stockInvestmentsData = await stockInvestmentsRes.json();
 
       setStockInvestments({
-        amount: totalInvested,
+        amount: stockInvestmentsData.stock_investments_money,
         loading: false
       });
+    
     } catch (err) {
       setError(err.message || 'Failed to load investments');
       setStockInvestments(prev => ({ ...prev, loading: false }));
