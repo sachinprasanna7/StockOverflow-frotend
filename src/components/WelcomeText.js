@@ -43,8 +43,14 @@ export default function WelcomeText() {
   }, [displayedText, isTyping, currentTextIndex, messages]);
 
   return (
-    <div>
-      <h2 className="text-center mb-4"><em>{displayedText}</em></h2>
+    <div style={{
+        marginLeft: "250px",
+        padding: "5px",
+        width: `calc(100vw - 300px)`,
+        boxSizing: "border-box",
+      }}>
+      <h2 style={{
+          textAlign: "center", marginBottom: "1.5rem"}}><em>{displayedText}</em></h2>
     </div>
   );
 }
