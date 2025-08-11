@@ -73,13 +73,13 @@ export default function SearchBar({ onStockSelect }) {
 
   const navigate = useNavigate();
 
-  const handleStockClick = (stock) => {
-    // Navigate to StockPage with symbol param
-    navigate(`/stock/${stock.symbol_id}`);
+ // SearchBar.js
+const handleStockClick = (stock) => {
+  const symbolLower = stock.symbol.toLowerCase();
 
-    // Optional: close search UI
-    handleCloseSearch();
-  };
+  navigate(`/stock/${symbolLower}`, { state: { stock } });
+  handleCloseSearch();
+};
 
   const handleRecentSearchClick = (recentStock) => {
     if (onStockSelect) {
