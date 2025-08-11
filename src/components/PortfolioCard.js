@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import "./PortfolioPage.css";
+import "../styles/PortfolioPage.css";
 
 export default function PortfolioPage() {
   const [portfolio, setPortfolio] = useState([]);
-  const [stocksData, setStocksData] = useState([]); // stock details (symbol, name, etc)
+  const [stocksData, setStocksData] = useState([]);
   const [currentPrices, setCurrentPrices] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

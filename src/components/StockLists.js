@@ -1,5 +1,5 @@
 import React from "react";
-import "./StockLists.css"; // custom CSS file
+import "../styles/StockLists.css"; // custom CSS file
 
 const data = {
   gainers: [

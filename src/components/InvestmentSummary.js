@@ -1,6 +1,97 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
 
 export default function InvestmentSummary() {
+  const [totalInvested, setTotalInvested] = useState(0);
+  const [currentValue, setCurrentValue] = useState(0);
+  const [totalReturns, setTotalReturns] = useState(0);
+  const [periodChange, setPeriodChange] = useState({ value: 0, percent: 0 });
+  const [holdings, setHoldings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Helper to get current period number
+  function getCurrentPeriod() {
+    const now = new Date();
+    const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    return Math.floor(totalSeconds / 20) + 1;
+  }
+
+  // Store period start prices for change calculation
+  const periodStartPricesRef = useRef({});
+
+  // Fetch all required data
+  useEffect(() => {
+    let interval;
+    async function fetchAllData() {
+      setLoading(true);
+      try {
+        // 1. Get total invested
+        const investedRes = await axios.get("http://localhost:8080/useraccount/getStockInvestmentsMoney", {
+          params: { userId: 1 }
+        });
+        setTotalInvested(investedRes.data.stock_investments_money || 0);
+
+        // 2. Get portfolio holdings
+        const holdingsRes = await axios.get("http://localhost:8080/portfolio/all");
+        const holdingsData = holdingsRes.data || [];
+        setHoldings(holdingsData);
+
+        // 3. For each holding, get latest price and period start price
+        let totalCurrent = 0;
+        let totalPeriodStart = 0;
+        let periodPrices = {};
+
+        const currentPeriod = getCurrentPeriod();
+
+        await Promise.all(
+          holdingsData.map(async (holding) => {
+            // Get symbol for this symbolId
+            const stockInfoRes = await axios.get(`http://localhost:8080/api/stock/${holding.symbolId}`);
+            const symbol = stockInfoRes.data.symbol;
+
+            // Get latest price
+            const latestPriceRes = await axios.get(
+              `https://marketdata.neueda.com/API/StockFeed/GetStockPricesForSymbol/${symbol}`
+            );
+            const latestPrice = latestPriceRes.data[0]?.price || 0;
+
+            // Get period start price (first price for current period)
+            const periodStartRes = await axios.get(
+              `https://marketdata.neueda.com/API/StockFeed/GetStockPricesForSymbol/${symbol}?HowManyValues=20`
+            );
+            const periodStartPriceObj = periodStartRes.data.find(
+              (item) => item.periodNumber === currentPeriod
+            );
+            const periodStartPrice = periodStartPriceObj ? periodStartPriceObj.price : latestPrice;
+            periodPrices[symbol] = periodStartPrice;
+
+            totalCurrent += latestPrice * holding.stockQuantity;
+            totalPeriodStart += periodStartPrice * holding.stockQuantity;
+          })
+        );
+
+        setCurrentValue(totalCurrent);
+        setTotalReturns(totalCurrent - (investedRes.data.stock_investments_money || 0));
+        setPeriodChange({
+          value: totalCurrent - totalPeriodStart,
+          percent: totalPeriodStart > 0 ? ((totalCurrent - totalPeriodStart) / totalPeriodStart) * 100 : 0
+        });
+      } catch (err) {
+        setTotalInvested(0);
+        setCurrentValue(0);
+        setTotalReturns(0);
+        setPeriodChange({ value: 0, percent: 0 });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchAllData();
+    interval = setInterval(fetchAllData, 20000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const containerStyle = {
     background: "linear-gradient(135deg, #113F67 0%, #1a5a8a 100%)",
     borderRadius: "16px",
@@ -73,99 +164,55 @@ export default function InvestmentSummary() {
   };
 
   return (
-<div style={Object.assign({ marginLeft: "250px", padding: "20px" }, containerStyle)}>
-<div style={backgroundPattern}></div>
-
+    <div style={Object.assign({ marginLeft: "250px", padding: "20px" }, containerStyle)}>
+      <div style={backgroundPattern}></div>
       <div className="mb-4">
         <h3 style={{ color: "white", fontWeight: "600", marginBottom: "8px", fontSize: "24px" }}>
           Portfolio Overview
         </h3>
       </div>
-
-      {/* Stats Cards */}
       <div className="d-flex justify-content-between gap-4">
         {/* Invested Amount */}
-        <div 
-          style={statCardStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          
+        <div style={statCardStyle}>
           <div style={labelStyle}>Total Invested</div>
-          <div style={valueStyle}>$38,143</div>
+          <div style={valueStyle}>
+            {loading ? "..." : `$${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          </div>
           <div style={{ ...subValueStyle, color: "rgba(255, 255, 255, 0.6)" }}>
             Principal amount
           </div>
         </div>
-
         {/* Current Value */}
-        <div 
-          style={statCardStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          
+        <div style={statCardStyle}>
           <div style={labelStyle}>Current Value</div>
-          <div style={valueStyle}>$39,245</div>
+          <div style={valueStyle}>
+            {loading ? "..." : `$${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          </div>
           <div style={{ ...subValueStyle, color: "rgba(255, 255, 255, 0.6)" }}>
             Market value
           </div>
         </div>
-
         {/* Returns */}
-        <div 
-          style={statCardStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          
+        <div style={statCardStyle}>
           <div style={labelStyle}>Total Returns</div>
-          <div style={{ ...valueStyle, ...positiveStyle }}>+$1,102</div>
-          <div style={{ ...subValueStyle, ...positiveStyle }}>
-            +2.89% ↗️
+          <div style={{ ...valueStyle, color: totalReturns >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${totalReturns >= 0 ? "+" : ""}$${totalReturns.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          </div>
+          <div style={{ ...subValueStyle, color: totalReturns >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${totalReturns >= 0 ? "+" : ""}${((totalReturns / (totalInvested || 1)) * 100).toFixed(2)}% ${totalReturns >= 0 ? "↗️" : "↘️"}`}
           </div>
         </div>
-
-        {/* Additional Metric - Day's Change */}
-        <div 
-          style={statCardStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          
-          <div style={labelStyle}>Today's Change</div>
-          <div style={{ ...valueStyle, ...positiveStyle }}>+$245</div>
-          <div style={{ ...subValueStyle, ...positiveStyle }}>
-            +0.63% ↗️
+        {/* Period's Change */}
+        <div style={statCardStyle}>
+          <div style={labelStyle}>Period's Change</div>
+          <div style={{ ...valueStyle, color: periodChange.value >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${periodChange.value >= 0 ? "+" : ""}$${periodChange.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          </div>
+          <div style={{ ...subValueStyle, color: periodChange.value >= 0 ? "#4ade80" : "#ef4444" }}>
+            {loading ? "..." : `${periodChange.value >= 0 ? "+" : ""}${periodChange.percent.toFixed(2)}% ${periodChange.value >= 0 ? "↗️" : "↘️"}`}
           </div>
         </div>
       </div>
-
-      {/* Bottom indicator */}
       <div className="mt-3 d-flex justify-content-center">
         <div style={{
           height: "4px",
@@ -178,3 +225,4 @@ export default function InvestmentSummary() {
     </div>
   );
 }
+
