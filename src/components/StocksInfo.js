@@ -119,7 +119,7 @@ export default function StocksInfo({ selectedStock }) {
     const fetchStockDetails = async () => {
       try {
         const res = await axios.get(
-          ` http://localhost:4000/api/stocks/${symbolLow}`
+          ` http://localhost:4000/api/currentStockValue/${symbolLow}`
         );
         if (res.data && res.data.length > 0) {
           setStockData(res.data[0]);
@@ -135,6 +135,7 @@ export default function StocksInfo({ selectedStock }) {
     };
 
     fetchStockDetails();
+    
   }, [symbolLow]);
 
   // Fetch trading balance

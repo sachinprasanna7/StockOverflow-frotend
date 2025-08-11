@@ -377,11 +377,11 @@ export default function PortfolioPage() {
                       <span className="fs-4 me-2">{getIcon()}</span>
                       <div className="flex-grow-1">
                         <h6 className={`card-title mb-0 ${getProfitColor()}`} style={{ fontWeight: "600" }}>
-                          {name}
+                          {/* {name} */}
                         </h6>
-                        <small className="text-muted">{companyName}</small>
+                        <small className="fw-semibold text-dark me-2 stock-name">{companyName.toUpperCase()}</small>
                       </div>
-                      <span className="badge bg-light text-muted">{symbol}</span>
+                      <span className="badge bg-light text-muted">{symbol.toUpperCase()}</span>
                     </div>
 
                     <div className="mb-3">

@@ -28,7 +28,6 @@ export default function StocksPage() {
             <Sidebar />
             <div className="flex-grow-1 bg-white p-4">
                 <TimePeriod />
-                <IndexDataRibbon />
                 <SearchBar onStockSelect={handleStockSelect} />
                 <StocksInfo selectedStock={selectedStock} />
             </div>

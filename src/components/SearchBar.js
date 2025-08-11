@@ -236,7 +236,7 @@ const handleStockClick = (stock) => {
                   ))
                 ) : (
                   // Show popular suggestions when no recent searches
-                  ["AAPL", "GOOGL", "TSLA", "NVDA"].map((symbol, index) => (
+                  ["AAPL", "GOOGL", "GS", "NVDA"].map((symbol, index) => (
                     <div
                       key={index}
                       style={{
