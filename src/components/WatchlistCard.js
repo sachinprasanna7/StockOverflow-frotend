@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 
 function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) {
+  const [dropdownAlignRight, setDropdownAlignRight] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [stockList, setStockList] = useState([]);
@@ -11,10 +12,19 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
     axios.get("http://localhost:8080/api/stock/getStocks")
       .then(res => {
         setStockList(res.data);
-        
       })
       .catch(err => console.error("Error fetching stock list:", err));
   }, []);
+
+  // Adjust dropdown alignment to keep it in viewport
+  useEffect(() => {
+    if (showDropdown && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const dropdownWidth = 240; // slightly wider than 220px for padding/scrollbar
+      const spaceRight = window.innerWidth - buttonRect.left;
+      setDropdownAlignRight(spaceRight < dropdownWidth);
+    }
+  }, [showDropdown]);
 
   const handleNameClick = (stock) => {
     const watchlistStockData = {
@@ -83,8 +93,9 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
               <div
                 className="position-absolute"
                 style={{
-                  top: "110%", // slightly below the button
-                  left: 0,
+                  top: "110%",
+                  left: dropdownAlignRight ? 'auto' : 0,
+                  right: dropdownAlignRight ? 0 : 'auto',
                   zIndex: 1000,
                   width: "220px",
                   backgroundColor: "#fff",
@@ -92,6 +103,8 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
                   boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                   padding: "8px",
                   borderRadius: "4px",
+                  maxWidth: '98vw',
+                  overflowX: 'auto',
                 }}
               >
                 <input
