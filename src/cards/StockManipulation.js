@@ -13,16 +13,16 @@ export default function StockManipulation({ symbol, currentPrice }) {
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
     const [selectedWatchlists, setSelectedWatchlists] = useState([]);
-    const [tradingBalance, setTradingBalance] = useState({
-        amount: 0,
-        loading: false,
-      });
-      const [portfolio, setPortfolio] = useState(null);
       console.log("symbol:", symbol);
     
     // Mock user data - in real app, this would come from API/context
-    const [userBalance, setUserBalance] = useState(10000); // User's available balance
-    const [userHoldings, setUserHoldings] = useState(50); // User's current holdings of this stock
+    const [userBalance, setUserBalance] = useState(
+        {amount: 0,
+        loading: false}); // User's available balance
+    const [userHoldings, setUserHoldings] = useState(
+        {amount: 0,
+            loading: false}
+    ); // User's current holdings of this stock
     
     // Mock watchlists - in real app, this would come from API
     const availableWatchlists = [
@@ -64,23 +64,28 @@ export default function StockManipulation({ symbol, currentPrice }) {
     useEffect(() => {
     const fetchTradingBalance = async () => {
         try {
-          setTradingBalance((prev) => ({ ...prev, loading: true }));
+        //   setUserBalance((prev) => ({ ...prev, loading: true }));
           const response = await axios.get(
             "http://localhost:8080/useraccount/getTradingMoney?userId=1"
           );
-          setTradingBalance({
+          setUserBalance({
             amount: response.data.trading_money,
             loading: false,
           });
           console.log("Trading Balance:", response.data.trading_money);
+
         } catch (error) {
           console.error("Error fetching balance:", error);
-          setTradingBalance((prev) => ({ ...prev, loading: false }));
+          setUserBalance((prev) => ({ ...prev, loading: false }));
         }
       };
   
       fetchTradingBalance();
     }, []);
+useEffect(() => {
+    console.log("userBalance:", userBalance);
+    console.log("userHoldings:", userHoldings);
+}, [userBalance, userHoldings]);
 
 
     useEffect(() => {
@@ -133,7 +138,7 @@ export default function StockManipulation({ symbol, currentPrice }) {
         } else if (isNaN(investmentAmount) || investmentAmount <= 0) {
             validationErrors.sipAmount = 'Investment amount must be a positive number';
         } else if (investmentAmount > userBalance) {
-            validationErrors.sipAmount = `Insufficient balance. Available: $${userBalance.toFixed(2)}`;
+            validationErrors.sipAmount = `Insufficient balance. Available: $${userBalance}`;
         }
         
         if (Object.keys(validationErrors).length > 0) {
@@ -259,13 +264,13 @@ export default function StockManipulation({ symbol, currentPrice }) {
                 fontSize: '0.9rem'
             }}>
                 <span> <strong style={{ textAlign: "right", fontSize: "1.2rem", marginBottom: "10px" }}>Balance: </strong>
-                    {tradingBalance.loading
+                    {userBalance.loading
                         ? "Loading balance..."
-                        : `  $${tradingBalance.amount.toFixed(2)}`}
+                        : `  $${userBalance.amount}`}
                     </span>
                 
-                <span><strong>Holdings:</strong> {holdings} shares</span>
-                <span><strong>Current Price:</strong> ${currentPrice.toFixed(2)}</span>
+                    <span><strong>Holdings:</strong> {holdings !== null && holdings !== undefined ? holdings : "0" } shares</span>
+                    <span><strong>Current Price:</strong> ${currentPrice.toFixed(2)}</span>
             </div>
 
             {/* Investment Type Toggle */}
