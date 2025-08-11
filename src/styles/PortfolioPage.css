@@ -127,4 +127,11 @@
     color: white; /* lighter neutral */
     font-style: italic;
   }
+
+  .custom-layout{
+    margin-left: 250px;
+    padding: 5px; /* Or use Bootstrap p-1 for ~4px */
+    width: calc(100vw - 300px);
+    box-sizing: border-box;
+  }
   

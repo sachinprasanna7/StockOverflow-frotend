@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import TimePeriod from '../components/TimePeriod';
 import IndexDataRibbon from '../components/IndexDataRibbon';
 import axios from 'axios';
+import '../styles/PortfolioPage.css'; // Import custom CSS for styling
 
 export default function TransactPage() {
   const [portfolio, setPortfolio] = useState([]);
@@ -135,7 +136,7 @@ export default function TransactPage() {
         <TimePeriod />
         <IndexDataRibbon />
 
-        <div className="container d-flex flex-column align-items-center mt-4">
+        <div className="container d-flex flex-column align-items-center mt-4 custom-layout">
           {/* Balance Card */}
           <div
             className="card border-primary mb-4"
