@@ -17,6 +17,7 @@ export default function OrderHistory() {
     axios.get('http://localhost:8080/orders')
       .then(res => {
         setOrders(res.data);
+        console.log('Fetched orders:', res.data);
         setFilteredOrders(res.data);
       })
       .catch(err => console.error('Error:', err));

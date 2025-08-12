@@ -88,7 +88,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                     amount: response.data.trading_money,
                     loading: false,
                 });
-                console.log("Trading Balance:", response.data.trading_money);
+                // console.log("Trading Balance:", response.data.trading_money);
             } catch (error) {
                 console.error("Error fetching balance:", error);
                 setUserBalance((prev) => ({ ...prev, loading: false }));
@@ -96,7 +96,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         };
 
         fetchTradingBalance();
-    }, );
+    },);
 
 
     useEffect(() => {
@@ -114,9 +114,9 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                     setHoldings(portfolioData.stockQuantity);
                 }
 
-                else{
+                else {
                     const portfolioData = await portfolioRes.json();
-                    console.log("Portfolio Data:", portfolioData);
+                    // console.log("Portfolio Data:", portfolioData);
                     setHoldings(portfolioData.stockQuantity);
                 }
 
@@ -213,26 +213,25 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                 }
             });
 
-            // // 4. Create order
-            // const orderPayload = {
-            //     timeOrdered: new Date(),
-            //     timeCompleted: new Date(),
-            //     stock: {
-            //         symbol_id: stockData.symbol_id,
-            //         symbol: symbol,
-            //         companyName: companyName,
-            //         symbolId: stockData.symbol_id
-            //     },
-            //     orderType: "MARKET",
-            //     stockQuantity: qty,
-            //     transactionAmount: totalCost,
-            //     orderStatus: "EXECUTED",
-            //     buy: true
-            // };
+            const now = new Date();
+            const formattedNow = now.toISOString().slice(0, 19);
+            // 4. Create order
+            const orderPayload = {
+                timeOrdered: formattedNow,
+                timeCompleted: formattedNow,
+                stock: {
+                    symbol_id: stockData.symbol_id
+                },
+                orderType: "MARKET",
+                stockQuantity: qty,
+                transactionAmount: totalCost,
+                orderStatus: "EXECUTED",
+                buy: true
+            };
 
-            // console.log("Order Payload:", orderPayload);
+            console.log("Order Payload:", orderPayload);
 
-            // await axios.post("http://localhost:8080/orders", orderPayload);
+            await axios.post("http://localhost:8080/orders", orderPayload);
 
             // Update frontend state after all calls succeed
             setUserBalance(prev => prev - totalCost);
@@ -285,11 +284,31 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                 }
             });
 
-        setUserBalance(prev => prev + totalEarnings);
-        setuserStockMoney(prev => prev - qty);
-        clearForms();
-        setSuccessMessage(`🎉 Congratulations! You successfully sold ${qty} shares of ${symbol} for $${totalEarnings.toFixed(2)}!`);
-        setTimeout(() => setSuccessMessage(''), 10000);
+            const now = new Date();
+            const formattedNow = now.toISOString().slice(0, 19);
+            // 4. Create order
+            const orderPayload = {
+                timeOrdered: formattedNow,
+                timeCompleted: formattedNow,
+                stock: {
+                    symbol_id: stockData.symbol_id
+                },
+                orderType: "MARKET",
+                stockQuantity: qty,
+                transactionAmount: totalEarnings,
+                orderStatus: "EXECUTED",
+                buy: false
+            };
+
+            console.log("Order Payload:", orderPayload);
+
+            await axios.post("http://localhost:8080/orders", orderPayload);
+
+            setUserBalance(prev => prev + totalEarnings);
+            setuserStockMoney(prev => prev - qty);
+            clearForms();
+            setSuccessMessage(`🎉 Congratulations! You successfully sold ${qty} shares of ${symbol} for $${totalEarnings.toFixed(2)}!`);
+            setTimeout(() => setSuccessMessage(''), 10000);
 
         } catch (error) {
             setErrors({ api: "Transaction failed. Please try again." });
