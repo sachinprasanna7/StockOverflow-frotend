@@ -4,59 +4,33 @@ import Sidebar from '../components/Sidebar';
 import TimePeriod from '../components/TimePeriod';
 import IndexDataRibbon from '../components/IndexDataRibbon';
 import axios from 'axios';
-import '../styles/PortfolioPage.css'; // Import custom CSS for styling
+import '../styles/PortfolioPage.css';
 
 export default function TransactPage() {
-  const [portfolio, setPortfolio] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [tradingBalance, setTradingBalance] = useState({ amount: 0, loading: false });
+  const [stockInvestments, setStockInvestments] = useState({ amount: 0, loading: false });
+  const [transaction, setTransaction] = useState({ type: 'deposit', amount: '', loading: false });
 
-  const [tradingBalance, setTradingBalance] = useState({
-    amount: 0,
-    loading: false
-  });
-
-  const [stockInvestments, setStockInvestments] = useState({
-    amount: 0,
-    loading: false
-  });
-
-  const [transaction, setTransaction] = useState({
-    type: 'deposit',
-    amount: '',
-    loading: false
-  });
-
-  // Fetch portfolio & calculate stock investments
+  // Fetch stock investments
   const fetchStockInvestments = async () => {
     try {
       setStockInvestments(prev => ({ ...prev, loading: true }));
-      const stockInvestmentsRes = await fetch('http://localhost:8080/useraccount/getStockInvestmentsMoney?userId=1');
-      const stockInvestmentsData = await stockInvestmentsRes.json();
-
-      setStockInvestments({
-        amount: stockInvestmentsData.stock_investments_money,
-        loading: false
-      });
-    
+      const res = await fetch('http://localhost:8080/useraccount/getStockInvestmentsMoney?userId=1');
+      const data = await res.json();
+      setStockInvestments({ amount: data.stock_investments_money, loading: false });
     } catch (err) {
       setError(err.message || 'Failed to load investments');
       setStockInvestments(prev => ({ ...prev, loading: false }));
     }
   };
 
-  // Fetch current trading balance
+  // Fetch trading balance
   const fetchTradingBalance = async () => {
     try {
       setTradingBalance(prev => ({ ...prev, loading: true }));
-      const response = await axios.get(
-        'http://localhost:8080/useraccount/getTradingMoney?userId=1'
-      );
-      setTradingBalance({
-        amount: response.data.trading_money,
-        loading: false
-      });
-      console.log('Trading Balance:', response.data.trading_money);
+      const response = await axios.get('http://localhost:8080/useraccount/getTradingMoney?userId=1');
+      setTradingBalance({ amount: response.data.trading_money, loading: false });
     } catch (error) {
       console.error('Error fetching balance:', error);
       setTradingBalance(prev => ({ ...prev, loading: false }));
@@ -69,46 +43,22 @@ export default function TransactPage() {
       alert('Please enter a valid amount');
       return;
     }
-
     const amount = parseFloat(transaction.amount);
-
     if (transaction.type === 'withdraw' && amount > tradingBalance.amount) {
       alert('Insufficient funds');
       return;
     }
-
     try {
       setTransaction(prev => ({ ...prev, loading: true }));
-
-      await axios.post(
-        'http://localhost:8080/useraccount/updateTradingMoney',
-        null,
-        {
-          params: {
-            userId: 1,
-            amount: amount,
-            isDeposit: transaction.type === 'deposit'
-          }
-        }
-      );
-
+      await axios.post('http://localhost:8080/useraccount/updateTradingMoney', null, {
+        params: { userId: 1, amount: amount, isDeposit: transaction.type === 'deposit' }
+      });
       setTradingBalance(prev => ({
         ...prev,
-        amount:
-          transaction.type === 'deposit'
-            ? prev.amount + amount
-            : prev.amount - amount
+        amount: transaction.type === 'deposit' ? prev.amount + amount : prev.amount - amount
       }));
-
-      setTransaction({
-        type: 'deposit',
-        amount: '',
-        loading: false
-      });
-
-      alert(
-        `${transaction.type === 'deposit' ? 'Deposit' : 'Withdrawal'} successful!`
-      );
+      setTransaction({ type: 'deposit', amount: '', loading: false });
+      alert(`${transaction.type === 'deposit' ? 'Deposit' : 'Withdrawal'} successful!`);
     } catch (error) {
       console.error('Transaction error:', error);
       alert('Transaction failed. Please try again.');
@@ -116,98 +66,110 @@ export default function TransactPage() {
     }
   };
 
-  // Initial load
   useEffect(() => {
     fetchTradingBalance();
     fetchStockInvestments();
   }, []);
 
   return (
-    <div className="d-flex min-vh-100">
+    <div className="d-flex min-vh-100 bg-light">
       <Sidebar />
-      <div className="flex-grow-1 bg-white p-4">
+      <div className="flex-grow-1 p-4">
         <TimePeriod />
         <IndexDataRibbon />
 
-        <div className="container d-flex flex-column align-items-center mt-4 custom-layout">
-          {/* Balance Card */}
+        <div className="container mt-4">
+          {/* Account Balance Card */}
           <div
-            className="card border-primary mb-4"
-            style={{ maxWidth: '500px', width: '100%' }}
+            className="card shadow-lg border-0 mb-4"
+            style={{ borderRadius: '15px', maxWidth: '650px', margin: '0 auto' }}
           >
-            <div className="card-header bg-primary text-white">
-              <h5 className="mb-0">💰 Account Balance</h5>
+            <div
+              className="card-header d-flex align-items-center"
+              style={{
+                backgroundColor: '#0d3b66',
+                color: '#ffffff',
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                borderTopLeftRadius: '15px',
+                borderTopRightRadius: '15px'
+              }}
+            >
+              💰 Account Balance
             </div>
             <div className="card-body text-center">
-              <div className="row">
-                <div className="col-6">
-                  <h6 className="text-success">Available Cash</h6>
-                  <h4 className="fw-bold">
+              <div className="row g-4">
+                <div className="col-6 border-end">
+                  <h6 className="text-muted">Available Cash</h6>
+                  <h3 className="fw-bold text-success">
                     {tradingBalance.loading ? (
-                      <div
-                        className="spinner-border text-success"
-                        role="status"
-                      ></div>
+                      <div className="spinner-border text-success" role="status"></div>
                     ) : (
-                      `$${tradingBalance.amount.toLocaleString('en-US', {
-                        minimumFractionDigits: 2
-                      })}`
+                      `$${tradingBalance.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
                     )}
-                  </h4>
+                  </h3>
                   <small className="text-muted">Ready to trade</small>
                 </div>
                 <div className="col-6">
-                  <h6 className="text-primary">Stock Investments</h6>
-                  <h4 className="fw-bold">
+                  <h6 className="text-muted">Stock Investments</h6>
+                  <h3 className="fw-bold text-primary">
                     {stockInvestments.loading ? (
-                      <div
-                        className="spinner-border text-primary"
-                        role="status"
-                      ></div>
+                      <div className="spinner-border text-primary" role="status"></div>
                     ) : (
-                      `$${stockInvestments.amount.toLocaleString('en-US', {
-                        minimumFractionDigits: 2
-                      })}`
+                      `$${stockInvestments.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
                     )}
-                  </h4>
+                  </h3>
                   <small className="text-muted">Currently invested</small>
                 </div>
               </div>
               <hr />
-              <h6>Total Portfolio Value</h6>
-              <h3 className="fw-bold text-warning">
-                ${(tradingBalance.amount + stockInvestments.amount).toLocaleString(
-                  'en-US',
-                  { minimumFractionDigits: 2 }
-                )}
-              </h3>
+              <h6 className="mt-3">Total Portfolio Value</h6>
+              <h2 className="fw-bold text-warning">
+                ${(tradingBalance.amount + stockInvestments.amount).toLocaleString('en-US', {
+                  minimumFractionDigits: 2
+                })}
+              </h2>
             </div>
           </div>
 
           {/* Transaction Form */}
           <div
-            className="card border-success"
-            style={{ maxWidth: '500px', width: '100%' }}
+            className="card shadow-lg border-0"
+            style={{ borderRadius: '15px', maxWidth: '650px', margin: '0 auto' }}
           >
-            <div className="card-header bg-success text-white">
-              <h5 className="mb-0">💳 Add/Withdraw Funds</h5>
+            <div
+              className="card-header"
+              style={{
+                backgroundColor: '#0d3b66',
+                color: '#ffffff',
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                borderTopLeftRadius: '15px',
+                borderTopRightRadius: '15px'
+              }}
+            >
+              💳 Add/Withdraw Funds
             </div>
             <div className="card-body">
               {/* Transaction Type */}
-              <div className="mb-3">
-                <div className="btn-group w-100" role="group">
+              <div className="mb-4 text-center">
+                <div className="btn-group w-75" role="group">
                   <input
                     type="radio"
                     className="btn-check"
                     name="transactionType"
                     id="deposit"
                     checked={transaction.type === 'deposit'}
-                    onChange={() =>
-                      setTransaction(prev => ({ ...prev, type: 'deposit' }))
-                    }
+                    onChange={() => setTransaction(prev => ({ ...prev, type: 'deposit' }))}
                   />
                   <label
-                    className="btn btn-outline-success"
+                    className="btn"
+                    style={{
+                      backgroundColor: transaction.type === 'deposit' ? '#0d3b66' : '#ffffff',
+                      color: transaction.type === 'deposit' ? '#ffffff' : '#0d3b66',
+                      border: '1px solid #0d3b66',
+                      fontWeight: '500'
+                    }}
                     htmlFor="deposit"
                   >
                     ⬆️ Add Money
@@ -219,12 +181,16 @@ export default function TransactPage() {
                     name="transactionType"
                     id="withdraw"
                     checked={transaction.type === 'withdraw'}
-                    onChange={() =>
-                      setTransaction(prev => ({ ...prev, type: 'withdraw' }))
-                    }
+                    onChange={() => setTransaction(prev => ({ ...prev, type: 'withdraw' }))}
                   />
                   <label
-                    className="btn btn-outline-danger"
+                    className="btn"
+                    style={{
+                      backgroundColor: transaction.type === 'withdraw' ? '#d9534f' : '#ffffff',
+                      color: transaction.type === 'withdraw' ? '#ffffff' : '#d9534f',
+                      border: '1px solid #d9534f',
+                      fontWeight: '500'
+                    }}
                     htmlFor="withdraw"
                   >
                     ⬇️ Withdraw Money
@@ -233,7 +199,7 @@ export default function TransactPage() {
               </div>
 
               {/* Amount Input */}
-              <div className="mb-3">
+              <div className="mb-4">
                 <label className="form-label fw-semibold">Amount ($)</label>
                 <input
                   type="number"
@@ -242,45 +208,36 @@ export default function TransactPage() {
                   step="0.01"
                   min="0"
                   value={transaction.amount}
-                  onChange={e =>
-                    setTransaction(prev => ({
-                      ...prev,
-                      amount: e.target.value
-                    }))
-                  }
+                  onChange={e => setTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                  style={{ borderRadius: '10px' }}
                 />
                 {transaction.type === 'withdraw' && (
                   <small className="text-muted">
                     Available: $
-                    {tradingBalance.amount.toLocaleString('en-US', {
-                      minimumFractionDigits: 2
-                    })}
+                    {tradingBalance.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </small>
                 )}
               </div>
 
               {/* Submit Button */}
               <button
-                className={`btn ${
-                  transaction.type === 'deposit'
-                    ? 'btn-success'
-                    : 'btn-danger'
-                } btn-lg w-100`}
+                className="btn btn-lg w-100"
+                style={{
+                  backgroundColor: transaction.type === 'deposit' ? '#0d3b66' : '#d9534f',
+                  color: '#ffffff',
+                  borderRadius: '10px',
+                  fontWeight: '500'
+                }}
                 onClick={handleTransaction}
                 disabled={transaction.loading || !transaction.amount}
               >
                 {transaction.loading ? (
                   <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                    ></span>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
                     Processing...
                   </>
                 ) : (
-                  `${transaction.type === 'deposit' ? '💰 Deposit' : '💸 Withdraw'} $${
-                    transaction.amount || '0.00'
-                  }`
+                  `${transaction.type === 'deposit' ? '💰 Deposit' : '💸 Withdraw'} $${transaction.amount || '0.00'}`
                 )}
               </button>
             </div>
