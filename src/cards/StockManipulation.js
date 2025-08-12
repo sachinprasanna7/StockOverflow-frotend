@@ -17,7 +17,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
     const [successMessage, setSuccessMessage] = useState('');
     const [selectedWatchlists, setSelectedWatchlists] = useState([]);
     const [stockData, setStockData] = useState();
-    const[availableWatchlists, setAvailableWatchlists] = useState([]);
+    const [availableWatchlists, setAvailableWatchlists] = useState([]);
     const [userBalance, setUserBalance] = useState({
         amount: 0,
         loading: false
@@ -26,6 +26,8 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         amount: 0,
         loading: false
     });
+    const [validationErrors, setValidationErrors] = useState({});
+
 
     // const availableWatchlists = [
     //     { id: 1, name: 'My Portfolio', description: 'Main investment portfolio' },
@@ -96,7 +98,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         };
 
         fetchTradingBalance();
-    },[stockData, symbol, currentPrice]);
+    }, [stockData, symbol, currentPrice]);
 
 
     useEffect(() => {
@@ -128,7 +130,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
 
         getQuantityHeld();
 
-    },[userBalance, stockData]);
+    }, [userBalance, stockData]);
 
 
     const handleSIPBuy = () => {
@@ -175,9 +177,19 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         const validationErrors = validateQuantity(quantity);
         const qty = parseFloat(quantity);
         const totalCost = qty * currentPrice;
+        console.log("Total Cost:", totalCost);
+        const userBalanceamt = userBalance.amount;
+        console.log("User Balance:", userBalanceamt);
 
-        if (totalCost > userBalance) {
-            validationErrors.balance = `Insufficient balance. Required: $${totalCost.toFixed(2)}, Available: $${userBalance.toFixed(2)}`;
+
+        if (totalCost > userBalanceamt) {
+            setValidationErrors(prevErrors => ({
+                ...prevErrors,
+                balance: `Insufficient balance. Required: $${totalCost.toFixed(2)}, Available: $${userBalanceamt.toFixed(2)}`
+            }));
+            console.error(`Insufficient balance. Required: $${totalCost.toFixed(2)}, Available: $${userBalanceamt.toFixed(2)}`);
+
+            validationErrors.balance = `Insufficient balance. Required: $${totalCost.toFixed(2)}, Available: $${userBalanceamt}`;
         }
 
         if (Object.keys(validationErrors).length > 0) {
@@ -244,74 +256,99 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             setErrors({ api: "Transaction failed. Please try again." });
         }
     };
-
+    useEffect(() => {
+        if (validationErrors.quantity) {
+            const timer = setTimeout(() => {
+                setValidationErrors(prev => ({
+                    ...prev,
+                    quantity: ""
+                }));
+            }, 700);
+            return () => clearTimeout(timer);
+        }
+    }, [validationErrors.quantity]);
 
     const handleSell = async () => {
         const validationErrors = validateQuantity(quantity, true);
         const qty = parseFloat(quantity);
         const totalEarnings = qty * currentPrice;
 
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            return;
+        // check if userHoldings is less than or equal to quantity mentioned
+        if (qty > holdings) {
+            console.error(`You cannot sell more than ${holdings} shares you own`);
+            // print this message in the UI
+            setValidationErrors(prevErrors => ({
+                ...prevErrors,
+                quantity: `You cannot sell more than ${holdings} shares you own`
+            }));
+
+            validationErrors.quantity = `You cannot sell more than ${holdings} shares you own`;
         }
+        else {
 
-        try {
-            // 1. Update trading money
-            await axios.post("http://localhost:8080/useraccount/updateTradingMoney", {}, {
-                params: {
-                    userId: 1,
-                    amount: totalEarnings,
-                    isDeposit: true
-                }
-            });
+            if (Object.keys(validationErrors).length > 0) {
+                setErrors(validationErrors);
+                return;
+            }
 
-            // 2. Update stock investments
-            await axios.post("http://localhost:8080/useraccount/updateStockInvestments", {}, {
-                params: {
-                    userId: 1,
-                    amount: totalEarnings,
-                    isBuying: false
-                }
-            });
+            try {
+                // 1. Update trading money
+                await axios.post("http://localhost:8080/useraccount/updateTradingMoney", {}, {
+                    params: {
+                        userId: 1,
+                        amount: totalEarnings,
+                        isDeposit: true
+                    }
+                });
 
-            // 3. Update portfolio
-            await axios.post("http://localhost:8080/portfolio/sell", {}, {
-                params: {
-                    symbolId: stockData.symbol_id,
-                    quantity: qty,
-                    pricePerStock: currentPrice
-                }
-            });
+                // 2. Update stock investments
+                await axios.post("http://localhost:8080/useraccount/updateStockInvestments", {}, {
+                    params: {
+                        userId: 1,
+                        amount: totalEarnings,
+                        isBuying: false
+                    }
+                });
 
-            const now = new Date();
-            const formattedNow = now.toISOString().slice(0, 19);
-            // 4. Create order
-            const orderPayload = {
-                timeOrdered: formattedNow,
-                timeCompleted: formattedNow,
-                stock: {
-                    symbol_id: stockData.symbol_id
-                },
-                orderType: "MARKET",
-                stockQuantity: qty,
-                transactionAmount: totalEarnings,
-                orderStatus: "EXECUTED",
-                buy: false
-            };
+                // 3. Update portfolio
+                await axios.post("http://localhost:8080/portfolio/sell", {}, {
+                    params: {
+                        symbolId: stockData.symbol_id,
+                        quantity: qty,
+                        pricePerStock: currentPrice
+                    }
+                });
 
-            console.log("Order Payload:", orderPayload);
+                const now = new Date();
+                const formattedNow = now.toISOString().slice(0, 19);
+                // 4. Create order
+                const orderPayload = {
+                    timeOrdered: formattedNow,
+                    timeCompleted: formattedNow,
+                    stock: {
+                        symbol_id: stockData.symbol_id
+                    },
+                    orderType: "MARKET",
+                    stockQuantity: qty,
+                    transactionAmount: totalEarnings,
+                    orderStatus: "EXECUTED",
+                    buy: false
+                };
 
-            await axios.post("http://localhost:8080/orders", orderPayload);
+                console.log("Order Payload:", orderPayload);
 
-            setUserBalance(prev => prev + totalEarnings);
-            setuserStockMoney(prev => prev - qty);
-            clearForms();
-            setSuccessMessage(`🎉 Congratulations! You successfully sold ${qty} shares of ${symbol} for $${totalEarnings.toFixed(2)}!`);
-            setTimeout(() => setSuccessMessage(''), 10000);
+                await axios.post("http://localhost:8080/orders", orderPayload);
 
-        } catch (error) {
-            setErrors({ api: "Transaction failed. Please try again." });
+                setUserBalance(prev => prev + totalEarnings);
+                setuserStockMoney(prev => prev - qty);
+                clearForms();
+                setSuccessMessage(`🎉 Congratulations! You successfully sold ${qty} shares of ${symbol} for $${totalEarnings.toFixed(2)}!`);
+                setTimeout(() => setSuccessMessage(''), 10000);
+
+            }
+            catch (error) {
+                setErrors({ api: "Transaction failed. Please try again." });
+            }
         }
     };
     const addToWatchlist = async (watchlistId, stockSymbol) => {
@@ -324,13 +361,13 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             if (!symbolId) {
                 throw new Error(`Symbol ID not found for ${stockSymbol}`);
             }
-    
+
             // 2️⃣ Add the stock to the watchlist
             await axios.post(`http://localhost:8080/watchlistStocks/add`, {
                 watchlistId: watchlistId,
                 symbolId: symbolId
-              });
-    
+            });
+
             console.log(`✅ Added ${stockSymbol} (ID: ${symbolId}) to watchlist ${watchlistId}`);
         } catch (error) {
             console.error(`❌ Failed to add ${stockSymbol} to watchlist ${watchlistId}:`, error);
@@ -340,36 +377,38 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         axios.get(`http://localhost:8080/watchlist/getWatchlists`)
             .then(res => {
                 const watchlists = res.data.map(wl => ({
-                    id: wl.watchlistId,    
-                    name: wl.watchlistName}
+                    id: wl.watchlistId,
+                    name: wl.watchlistName
+                }
                 ));
                 console.log('Fetched watchlists:', res.data);
-                setAvailableWatchlists(watchlists);})
-            .catch(err => console.error("Error fetching watchlists:", err));    
+                setAvailableWatchlists(watchlists);
+            })
+            .catch(err => console.error("Error fetching watchlists:", err));
     }, []);
     const handleAddToWatchlist = () => {
         if (selectedWatchlists.length === 0) {
             setErrors({ watchlist: 'Please select at least one watchlist' });
             return;
         }
-    
+
         selectedWatchlists.forEach(id => {
             const watchlist = availableWatchlists.find(w => w.id === id);
             if (watchlist) {
                 addToWatchlist(watchlist.id, symbol); // 👈 Call your function here
             }
         });
-    
+
         const watchlistNames = selectedWatchlists
             .map(id => availableWatchlists.find(w => w.id === id)?.name)
             .join(', ');
-    
+
         setSuccessMessage(`✅ Great! ${symbol} has been added to: ${watchlistNames}!`);
         setShowWatchlistForm(false);
         setSelectedWatchlists([]);
         setTimeout(() => setSuccessMessage(''), 10000);
     };
-    
+
 
     const handleWatchlistToggle = (watchlistId) => {
         setSelectedWatchlists(prev => {
@@ -564,6 +603,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             {showBuyForm && investmentType === 'Delivery' && (
                 <div className="form-container">
                     <h4 className="form-title">Buy {symbol}</h4>
+
                     <div className="mb-3">
                         <label className="form-label">
                             Quantity *
@@ -575,13 +615,22 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                             placeholder="Enter quantity"
                             className="form-input"
                         />
+
+                        {/* Error message for quantity */}
+                        {validationErrors.quantity && (
+                            <div className="alert alert-danger mt-2">
+                                {validationErrors.quantity}
+                            </div>
+                        )}
                     </div>
+
                     <div className="form-info">
                         <p><strong>Price per share:</strong> ${currentPrice.toFixed(2)}</p>
                         {quantity && !isNaN(quantity) && parseFloat(quantity) > 0 && (
                             <p><strong>Total Cost:</strong> ${(parseFloat(quantity) * currentPrice).toFixed(2)}</p>
                         )}
                     </div>
+
                     <div className="form-buttons">
                         <button onClick={handleBuy} className="btn-confirm">
                             Confirm Buy
@@ -593,10 +642,12 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                 </div>
             )}
 
+
             {/* Sell Form for Stock Delivery */}
             {showSellForm && investmentType === 'Delivery' && (
                 <div className="form-container">
                     <h4 className="form-title">Sell {symbol}</h4>
+
                     <div className="mb-3">
                         <label className="form-label">
                             Quantity
@@ -609,13 +660,22 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                             max={userStockMoney}
                             className="form-input"
                         />
+
+                        {/* Error message for quantity */}
+                        {validationErrors.quantity && (
+                            <div className="alert alert-danger mt-2">
+                                {validationErrors.quantity}
+                            </div>
+                        )}
                     </div>
+
                     <div className="form-info">
                         <p><strong>Price per share:</strong> ${currentPrice.toFixed(2)}</p>
                         {quantity && !isNaN(quantity) && parseFloat(quantity) > 0 && (
                             <p><strong>Total Earnings:</strong> ${(parseFloat(quantity) * currentPrice).toFixed(2)}</p>
                         )}
                     </div>
+
                     <div className="form-buttons">
                         <button onClick={handleSell} className="btn-confirm sell">
                             Confirm Sell
@@ -626,6 +686,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                     </div>
                 </div>
             )}
+
 
             {/* Watchlist Selection Form */}
             {showWatchlistForm && (

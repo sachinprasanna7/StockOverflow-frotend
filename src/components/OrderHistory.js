@@ -39,6 +39,18 @@ export default function OrderHistory() {
     setFilteredOrders(filtered);
   }, [searchQuery, orders]);
 
+  const alertInfoStyle = {
+    backgroundColor: '#d1ecf1',
+    color: '#0c5460',
+    border: '1px solid #bee5eb',
+    textAlign: 'center',
+    padding: '15px 20px',
+    borderRadius: '6px',
+    maxWidth: '400px',
+    width: '100%'
+  };
+  
+
   return (
     <div style={{ marginLeft: "250px", padding: "20px", width: `calc(100vw - 300px)`, boxSizing: 'border-box' }}>
       
@@ -85,7 +97,7 @@ export default function OrderHistory() {
       />
 
       {filteredOrders.length === 0 ? (
-        <p style={{ textAlign: "center", color: "#6c757d", fontSize: "1.1rem" }}>No orders found.</p>
+        <p style={alertInfoStyle}>No orders found.</p>
       ) : (
         filteredOrders.map(order => (
           <OrderCard key={order.orderId} order={order} />
