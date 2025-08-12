@@ -17,7 +17,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
     const [successMessage, setSuccessMessage] = useState('');
     const [selectedWatchlists, setSelectedWatchlists] = useState([]);
     const [stockData, setStockData] = useState();
-
+    const[availableWatchlists, setAvailableWatchlists] = useState([]);
     const [userBalance, setUserBalance] = useState({
         amount: 0,
         loading: false
@@ -27,13 +27,13 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         loading: false
     });
 
-    const availableWatchlists = [
-        { id: 1, name: 'My Portfolio', description: 'Main investment portfolio' },
-        { id: 2, name: 'Tech Stocks', description: 'Technology companies' },
-        { id: 3, name: 'Growth Stocks', description: 'High growth potential stocks' },
-        { id: 4, name: 'Dividend Stocks', description: 'Dividend paying companies' },
-        { id: 5, name: 'Favorites', description: 'Most watched stocks' }
-    ];
+    // const availableWatchlists = [
+    //     { id: 1, name: 'My Portfolio', description: 'Main investment portfolio' },
+    //     { id: 2, name: 'Tech Stocks', description: 'Technology companies' },
+    //     { id: 3, name: 'Growth Stocks', description: 'High growth potential stocks' },
+    //     { id: 4, name: 'Dividend Stocks', description: 'Dividend paying companies' },
+    //     { id: 5, name: 'Favorites', description: 'Most watched stocks' }
+    // ];
 
     const clearForms = () => {
         setQuantity('');
@@ -314,22 +314,62 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             setErrors({ api: "Transaction failed. Please try again." });
         }
     };
-
+    const addToWatchlist = async (watchlistId, stockSymbol) => {
+        try {
+            // 1️⃣ Get the symbolId from your API
+            const symbolRes = await axios.get(`http://localhost:8080/api/stock/symbol/${stockSymbol}`);
+            console.log(`Symbol data for ${stockSymbol}:`, symbolRes.data);
+            const symbolId = symbolRes.data?.symbol_id;
+            console.log(`Symbol ID for add watchlist ${stockSymbol}:`, symbolId);
+            if (!symbolId) {
+                throw new Error(`Symbol ID not found for ${stockSymbol}`);
+            }
+    
+            // 2️⃣ Add the stock to the watchlist
+            await axios.post(`http://localhost:8080/watchlistStocks/add`, {
+                watchlistId: watchlistId,
+                symbolId: symbolId
+              });
+    
+            console.log(`✅ Added ${stockSymbol} (ID: ${symbolId}) to watchlist ${watchlistId}`);
+        } catch (error) {
+            console.error(`❌ Failed to add ${stockSymbol} to watchlist ${watchlistId}:`, error);
+        }
+    };
+    useEffect(() => {
+        axios.get(`http://localhost:8080/watchlist/getWatchlists`)
+            .then(res => {
+                const watchlists = res.data.map(wl => ({
+                    id: wl.watchlistId,    
+                    name: wl.watchlistName}
+                ));
+                console.log('Fetched watchlists:', res.data);
+                setAvailableWatchlists(watchlists);})
+            .catch(err => console.error("Error fetching watchlists:", err));    
+    }, []);
     const handleAddToWatchlist = () => {
         if (selectedWatchlists.length === 0) {
             setErrors({ watchlist: 'Please select at least one watchlist' });
             return;
         }
-
-        const watchlistNames = selectedWatchlists.map(id =>
-            availableWatchlists.find(w => w.id === id)?.name
-        ).join(', ');
-
+    
+        selectedWatchlists.forEach(id => {
+            const watchlist = availableWatchlists.find(w => w.id === id);
+            if (watchlist) {
+                addToWatchlist(watchlist.id, symbol); // 👈 Call your function here
+            }
+        });
+    
+        const watchlistNames = selectedWatchlists
+            .map(id => availableWatchlists.find(w => w.id === id)?.name)
+            .join(', ');
+    
         setSuccessMessage(`✅ Great! ${symbol} has been added to: ${watchlistNames}!`);
         setShowWatchlistForm(false);
         setSelectedWatchlists([]);
         setTimeout(() => setSuccessMessage(''), 10000);
     };
+    
 
     const handleWatchlistToggle = (watchlistId) => {
         setSelectedWatchlists(prev => {
