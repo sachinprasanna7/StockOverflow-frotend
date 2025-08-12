@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import OrderCard from '../cards/OrderCard';
 import WebFont from 'webfontloader';
+import '../styles/OrderHistory.css'; // Assuming you have a CSS file for styles
+
 WebFont.load({
-    google: {
-      families: ['Mozilla Headline:200-700']
-    }
-  });
+  google: {
+    families: ['Mozilla Headline:200-700']
+  }
+});
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -49,55 +51,23 @@ export default function OrderHistory() {
     maxWidth: '400px',
     width: '100%'
   };
-  
+
 
   return (
     <div style={{ marginLeft: "250px", padding: "20px", width: `calc(100vw - 300px)`, boxSizing: 'border-box' }}>
-      
-      <h2 
-        style={{
-            color: "#113F67",
-            marginBottom: "30px",
-            fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue','sans-serif'`,
-            textAlign: "center",
-            fontWeight: "700",
-            fontSize: "2.5rem",
-          }}
-      >
-        Order History
-      </h2>
+
+      <h2 className="page-title">Order History</h2>
 
       <input
         type="text"
         placeholder="Search by stock symbol or name..."
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "12px 16px",
-          fontSize: "18px",
-          borderRadius: "10px",
-          border: "1.5px solid #113F67",
-          boxSizing: "border-box",
-          marginBottom: "25px",
-          boxShadow: "0 2px 6px rgba(17, 63, 103, 0.15)",
-          transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-          outline: "none",
-          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        }}
-        onFocus={e => {
-          e.target.style.borderColor = "#0b2a4d";
-          e.target.style.boxShadow = "0 4px 12px rgba(11, 42, 77, 0.3)";
-        }}
-        onBlur={e => {
-          e.target.style.borderColor = "#113F67";
-          e.target.style.boxShadow = "0 2px 6px rgba(17, 63, 103, 0.15)";
-        }}
+        className="search-input"
       />
 
       {filteredOrders.length === 0 ? (
-        <p style={alertInfoStyle}>No orders found.</p>
+        <p className="no-orders-message">No orders found.</p>
       ) : (
         filteredOrders.map(order => (
           <OrderCard key={order.orderId} order={order} />
