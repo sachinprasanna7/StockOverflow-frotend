@@ -112,12 +112,9 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
                 <div>
                     <h3 className="stock-title mb-1 d-flex align-items-center">
                         <span className="fw-bold text-dark me-2" style={{ fontSize: "1.5rem" }}>
-                        
-
                             {upperCompanyName}
                         </span>
                         <span className="badge bg-light text-secondary" style={{ fontSize: "0.85rem" }}>
-
                             {upperSymbol}
                         </span>
                     </h3>
