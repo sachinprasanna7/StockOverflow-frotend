@@ -284,7 +284,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
 
             validationErrors.quantity = `You cannot sell more than ${holdings} shares you own`;
         }
-        else {
+        
 
             if (Object.keys(validationErrors).length > 0) {
                 setErrors(validationErrors);
@@ -349,7 +349,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             catch (error) {
                 setErrors({ api: "Transaction failed. Please try again." });
             }
-        }
+        
     };
     const addToWatchlist = async (watchlistId, stockSymbol) => {
         try {
@@ -478,12 +478,13 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             )}
 
             {/* Error Messages */}
-            {(errors.balance || errors.quantity || errors.watchlist || errors.sipAmount) && (
+            {(errors.balance || errors.quantity || errors.watchlist || errors.sipAmount || validationErrors.quantity) && (
                 <div className="error-container">
                     {errors.balance && <div>{errors.balance}</div>}
                     {errors.quantity && <div>{errors.quantity}</div>}
                     {errors.watchlist && <div>{errors.watchlist}</div>}
                     {errors.sipAmount && <div>{errors.sipAmount}</div>}
+                    
                 </div>
             )}
 
@@ -616,12 +617,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                             className="form-input"
                         />
 
-                        {/* Error message for quantity */}
-                        {validationErrors.quantity && (
-                            <div className="alert alert-danger mt-2">
-                                {validationErrors.quantity}
-                            </div>
-                        )}
+                       
                     </div>
 
                     <div className="form-info">
@@ -645,6 +641,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
 
             {/* Sell Form for Stock Delivery */}
             {showSellForm && investmentType === 'Delivery' && (
+                
                 <div className="form-container">
                     <h4 className="form-title">Sell {symbol}</h4>
 
@@ -661,14 +658,10 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                             className="form-input"
                         />
 
-                        {/* Error message for quantity */}
-                        {validationErrors.quantity && (
-                            <div className="alert alert-danger mt-2">
-                                {validationErrors.quantity}
-                            </div>
-                        )}
+                        
+                        
                     </div>
-
+                    
                     <div className="form-info">
                         <p><strong>Price per share:</strong> ${currentPrice.toFixed(2)}</p>
                         {quantity && !isNaN(quantity) && parseFloat(quantity) > 0 && (
