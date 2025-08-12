@@ -45,6 +45,30 @@ app.get('/api/prevStockValue/:ticker', async (req, res) => {
 });
 
 
+// Third API - Get history of stock prices
+app.get('/api/chartValues/:ticker', async (req, res) => {
+  const ticker = req.params.ticker;
+  const noOfValues = req.query.noOfValues;
+
+  if (!noOfValues) {
+    return res.status(400).json({ error: 'noOfValues query parameter is required' });
+  }
+
+  if(noOfValues > 5000) {
+    return res.status(400).json({ error: 'noOfValues must be 5000 or less' });
+  }
+
+  try {
+    const response = await axios.get(
+      `https://marketdata.neueda.com/API/StockFeed/GetStockPricesForSymbol/${ticker}?HowManyValues=${noOfValues}`
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: 'Error fetching stock chart data' });
+  }
+});
+
 app.listen(4000, () => {
   console.log('Proxy server running on port 4000');
 });

@@ -74,6 +74,9 @@ const iconStyle = {
 
 function getPeriodFromTime() {
   const now = new Date();
+  //subtract 5 hours and 30 minutes from it
+  now.setHours(now.getHours() - 5);
+  now.setMinutes(now.getMinutes() - 30);
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const seconds = now.getSeconds();

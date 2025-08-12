@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from 'react-router-dom';
 
 //Styles from InvestmentSummary
+
 const containerStyle = {
   background: "linear-gradient(135deg, #113F67 0%, #1a5a8a 100%)",
   borderRadius: "16px",
@@ -58,6 +60,8 @@ const subValueStyle = {
 
 function getPeriodFromTime() {
   const now = new Date();
+  now.setHours(now.getHours() - 5);
+  now.setMinutes(now.getMinutes() - 30);
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const seconds = now.getSeconds();
@@ -75,6 +79,12 @@ export default function PortfolioPage() {
   const [error, setError] = useState(null);
   const [periodStartValue, setPeriodStartValue] = useState(null);
   let currentPeriodRef = useRef(-1);
+
+  const navigate = useNavigate();
+
+  const handleStockClick = (symbol) => {
+    navigate(`/stock/${symbol.toLowerCase()}`);
+  };
 
   // Add debug logging
   useEffect(() => {
@@ -308,24 +318,24 @@ export default function PortfolioPage() {
       {/* Holdings Section */}
       <div className="mt-4">
         <h4 className="mb-4" style={{ fontWeight: "600", color: "#1a365d" }}>Your Holdings</h4>
-        
+
         {/* Debug info */}
         {portfolio.length === 0 && (
           <div className="alert alert-info">
             No portfolio items found. Check if the API is returning data.
           </div>
         )}
-        
+
         {portfolio.length > 0 && stocksData.length === 0 && (
           <div className="alert alert-warning">
             Portfolio found but no stock details loaded. Check stock API endpoints.
           </div>
         )}
-        
+
         <div className="row g-4">
           {portfolio.map((item, index) => {
             const stockDetail = symbolIdToStock[item.symbolId];
-            
+
             // More detailed debugging
             if (!stockDetail) {
               console.warn(`No stock detail found for symbolId: ${item.symbolId}`, {
@@ -371,7 +381,23 @@ export default function PortfolioPage() {
 
             return (
               <div key={index} className="col-md-6 col-lg-4">
-                <div className={`card h-100 shadow-sm ${getProfitStyle()}`}>
+                <div
+                  className={`card h-100 shadow-sm ${getProfitStyle()}`}
+                  style={{
+                    transition: "all 0.3s ease",
+                    cursor: "pointer"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                    e.currentTarget.style.boxShadow = "0 12px 30px rgba(0, 0, 0, 0.2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.boxShadow = "";
+                  }}
+                  onClick={() => handleStockClick(symbol)}
+                >
+
                   <div className="card-body">
                     <div className="d-flex align-items-center mb-3">
                       <span className="fs-4 me-2">{getIcon()}</span>
@@ -389,12 +415,12 @@ export default function PortfolioPage() {
                         <span className="small text-muted">Quantity:</span>
                         <span className="fw-semibold">{item.stockQuantity} shares</span>
                       </div>
-                      
+
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <span className="small text-muted">Avg Price:</span>
                         <span>${item.averagePrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                       </div>
-                      
+
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <span className="small text-muted">Current Price:</span>
                         <span className={currentPrice > item.averagePrice ? "text-success" : "text-danger"}>
@@ -409,7 +435,7 @@ export default function PortfolioPage() {
                       <span className="fw-semibold">Invested:</span>
                       <span className="fw-semibold">${investedAmt.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
-                    
+
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <span className="fw-semibold">Current Value:</span>
                       <span className="fw-semibold">${currentAmt.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>

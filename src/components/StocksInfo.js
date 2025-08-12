@@ -217,7 +217,7 @@ export default function StocksInfo({ selectedStock }) {
 
 
       {/* Stock Title */}
-      <h2
+      {/* <h2
         style={{
           textAlign: "center",
           fontFamily: "'Mozilla Headline', sans-serif",
@@ -228,17 +228,17 @@ export default function StocksInfo({ selectedStock }) {
         }}
       >
         {stockData.companyName} ({stockData.symbol.toUpperCase()})
-      </h2>
+      </h2> */}
 
       {/* Price */}
-      <div style={{ textAlign: "center", fontSize: "2.2rem", fontWeight: "600" }}>
+      {/* <div style={{ textAlign: "center", fontSize: "2.2rem", fontWeight: "600" }}>
         <p style={{ color: "#113F67" }}>
           Price: ${currentPrice?.toFixed(2)}
         </p>
-      </div>
+      </div> */}
 
       {/* Stock Chart */}
-      <StockChart symbol={stockData.symbol} onPriceUpdate={handlePriceUpdate} />
+      <StockChart symbol={stockData.symbol} currentPrice={currentPrice} companyName={stockData.companyName} onPriceUpdate={handlePriceUpdate} />
 
       {/* Buy/Sell UI */}
       <StockManipulation symbol={stockData.symbol} companyName={stockData.companyName} currentPrice={currentPrice} />
