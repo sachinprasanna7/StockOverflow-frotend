@@ -7,6 +7,7 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
     const [loading, setLoading] = useState(true);
     const chartRef = useRef(null);
     console.log('StockChart rendered with symbol:', symbol, 'and valuesToShow:', valuesToShow);
+    console.log("curretnt price", currentPrice)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -100,6 +101,9 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
     // Color scheme based on performance
     const lineColor = isPositive ? '#10b981' : '#ef4444';
     const gradientColor = isPositive ? '#10b981' : '#ef4444';
+    const upperCompanyName = companyName?.toUpperCase() ?? companyName;
+    const upperSymbol = symbol?.toUpperCase() ?? symbol;
+    
 
     return (
         <div className="stock-chart-container">
@@ -108,10 +112,13 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
                 <div>
                     <h3 className="stock-title mb-1 d-flex align-items-center">
                         <span className="fw-bold text-dark me-2" style={{ fontSize: "1.5rem" }}>
-                            {companyName.toUpperCase()}
+                        
+
+                            {upperCompanyName}
                         </span>
                         <span className="badge bg-light text-secondary" style={{ fontSize: "0.85rem" }}>
-                            {symbol.toUpperCase()}
+
+                            {upperSymbol}
                         </span>
                     </h3>
                     <div className="price-info">

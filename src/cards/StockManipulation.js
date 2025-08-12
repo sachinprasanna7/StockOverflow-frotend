@@ -96,7 +96,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         };
 
         fetchTradingBalance();
-    },);
+    },[stockData, symbol, currentPrice]);
 
 
     useEffect(() => {
@@ -128,7 +128,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
 
         getQuantityHeld();
 
-    },);
+    },[userBalance, stockData]);
 
 
     const handleSIPBuy = () => {
