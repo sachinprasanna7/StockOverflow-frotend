@@ -135,3 +135,36 @@
     box-sizing: border-box;
   }
   
+  .alert {
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .parent-container {
+    display: flex;
+    justify-content: center;  /* horizontal center */
+    align-items: center;      /* vertical center */
+    height: 300px;            /* set a height or min-height */
+  }
+  
+  /* Your alert */
+  .alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    text-align: center;
+    padding: 15px 20px;
+    border-radius: 6px;
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  .alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+  }
+  

@@ -321,14 +321,16 @@ export default function PortfolioPage() {
 
         {/* Debug info */}
         {portfolio.length === 0 && (
-          <div className="alert alert-info">
-            No portfolio items found. Check if the API is returning data.
+          <div className="parent-container">
+          <div className="alert alert-info" >
+            No portfolio items in your account. Please add some stocks to view your portfolio.
+          </div>
           </div>
         )}
 
         {portfolio.length > 0 && stocksData.length === 0 && (
           <div className="alert alert-warning">
-            Portfolio found but no stock details loaded. Check stock API endpoints.
+            Portfolio found but no stock details loaded. 
           </div>
         )}
 
