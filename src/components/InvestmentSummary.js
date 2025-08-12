@@ -96,13 +96,6 @@ export default function InvestmentSummary() {
     const [periodStartValue, setPeriodStartValue] = useState(null);
     let currentPeriodRef = useRef(-1);
   
-    // Add debug logging
-    useEffect(() => {
-      console.log("Portfolio data:", portfolio);
-      console.log("Stocks data:", stocksData);
-      console.log("Current prices:", currentPrices);
-    }, [portfolio, stocksData, currentPrices]);
-  
     useEffect(() => {
       async function fetchData() {
         try {
