@@ -11,6 +11,7 @@ import PortfolioPage1 from "./pages/PortfolioPage1";
 import StocksPage from "./pages/StocksPage";
 import TransactPage from "./pages/TransactPage";
 import SipPage from "./pages/SipPage";
+import HelpPage from "./pages/HelpPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/transact" element={<TransactPage />} />
         <Route path="/sip" element={<SipPage />} />
         <Route path="/stock/:symbol" element={<StocksPage />} />
+        <Route path="/help" element={<HelpPage />} />
       </Routes>
     </Router>
   );

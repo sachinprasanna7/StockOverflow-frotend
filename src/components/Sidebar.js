@@ -66,7 +66,8 @@ export default function Sidebar() {
     { name: "Transact", icon: "💳", path: "/transact" },
     { name: "SIPs", icon: "🔄", path: "/sip" },
     { name: "Watchlist", icon: "👁️", path: "/watchlists" },
-    { name: "Settings", icon: "⚙️", path: "/settings" }
+    { name: "Settings", icon: "⚙️", path: "/settings" },
+    { name: "Help", icon: "❓", path: "/help" }  
   ];
 
   return (
