@@ -288,8 +288,8 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
                   className="position-absolute"
                   style={{
                     top: "110%",
-                    left: dropdownAlignRight ? 'auto' : 0,
-                    right: dropdownAlignRight ? 0 : 'auto',
+                    left: dropdownAlignRight ? 0 : 'auto',
+                    right: dropdownAlignRight ? 'auto': 0,
                     zIndex: 1050,
                     width: "260px",
                     backgroundColor: "white",
@@ -431,13 +431,13 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
                 onMouseOut={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
-              onClick={() => handleStockClick(stock.symbol)}>
-                <div className="flex-grow-1">
+              >
+                <div className="flex-grow-1" onClick={() => handleStockClick(stock.symbol)}>
                   <div style={{ fontWeight: 600, color: "rgb(17, 63, 103)", fontSize: "0.95rem" }}>
                     {stock.name}
                   </div>
                   <div className="d-flex align-items-center gap-2 mt-1">
-                    <small className="text-muted">{stock.symbol}</small>
+                    <small className="text-muted" >{stock.symbol}</small>
                     {currentPrices[stock.symbol] ? (
                       <small style={{ color: "rgb(17, 63, 103)", fontWeight: 500 }}>
                         ${parseFloat(currentPrices[stock.symbol]).toFixed(2)}
