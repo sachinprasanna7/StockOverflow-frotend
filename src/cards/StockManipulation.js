@@ -27,6 +27,9 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         loading: false
     });
     const [validationErrors, setValidationErrors] = useState({});
+    const [lockedPrice, setLockedPrice] = useState(null);
+    const [company, setCompany] = useState( symbol);
+
 
 
     // const availableWatchlists = [
@@ -68,6 +71,8 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             try {
                 const response = await axios.get(`http://localhost:8080/api/stock/symbol/${symbol}`);
                 setStockData(response.data);
+                setCompany( response.data.companyName);
+                console.log("company:", company);
 
             } catch (error) {
                 console.error("Error fetching stock information:", error);
@@ -267,7 +272,19 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             return () => clearTimeout(timer);
         }
     }, [validationErrors.quantity]);
+    const handleQuantityChange = (e) => {
+        const value = e.target.value;
+        setQuantity(value);
 
+        // Lock the price the first time user enters a quantity
+        if (!lockedPrice && value) {
+            setLockedPrice(currentPrice);
+        }
+
+        if (!value) {
+            setLockedPrice(null);
+        }
+    };
     const handleSell = async () => {
         const validationErrors = validateQuantity(quantity, true);
         const qty = parseFloat(quantity);
@@ -284,72 +301,72 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
 
             validationErrors.quantity = `You cannot sell more than ${holdings} shares you own`;
         }
-        
 
-            if (Object.keys(validationErrors).length > 0) {
-                setErrors(validationErrors);
-                return;
-            }
 
-            try {
-                // 1. Update trading money
-                await axios.post("http://localhost:8080/useraccount/updateTradingMoney", {}, {
-                    params: {
-                        userId: 1,
-                        amount: totalEarnings,
-                        isDeposit: true
-                    }
-                });
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
 
-                // 2. Update stock investments
-                await axios.post("http://localhost:8080/useraccount/updateStockInvestments", {}, {
-                    params: {
-                        userId: 1,
-                        amount: totalEarnings,
-                        isBuying: false
-                    }
-                });
+        try {
+            // 1. Update trading money
+            await axios.post("http://localhost:8080/useraccount/updateTradingMoney", {}, {
+                params: {
+                    userId: 1,
+                    amount: totalEarnings,
+                    isDeposit: true
+                }
+            });
 
-                // 3. Update portfolio
-                await axios.post("http://localhost:8080/portfolio/sell", {}, {
-                    params: {
-                        symbolId: stockData.symbol_id,
-                        quantity: qty,
-                        pricePerStock: currentPrice
-                    }
-                });
+            // 2. Update stock investments
+            await axios.post("http://localhost:8080/useraccount/updateStockInvestments", {}, {
+                params: {
+                    userId: 1,
+                    amount: totalEarnings,
+                    isBuying: false
+                }
+            });
 
-                const now = new Date();
-                const formattedNow = now.toISOString().slice(0, 19);
-                // 4. Create order
-                const orderPayload = {
-                    timeOrdered: formattedNow,
-                    timeCompleted: formattedNow,
-                    stock: {
-                        symbol_id: stockData.symbol_id
-                    },
-                    orderType: "MARKET",
-                    stockQuantity: qty,
-                    transactionAmount: totalEarnings,
-                    orderStatus: "EXECUTED",
-                    buy: false
-                };
+            // 3. Update portfolio
+            await axios.post("http://localhost:8080/portfolio/sell", {}, {
+                params: {
+                    symbolId: stockData.symbol_id,
+                    quantity: qty,
+                    pricePerStock: currentPrice
+                }
+            });
 
-                console.log("Order Payload:", orderPayload);
+            const now = new Date();
+            const formattedNow = now.toISOString().slice(0, 19);
+            // 4. Create order
+            const orderPayload = {
+                timeOrdered: formattedNow,
+                timeCompleted: formattedNow,
+                stock: {
+                    symbol_id: stockData.symbol_id
+                },
+                orderType: "MARKET",
+                stockQuantity: qty,
+                transactionAmount: totalEarnings,
+                orderStatus: "EXECUTED",
+                buy: false
+            };
 
-                await axios.post("http://localhost:8080/orders", orderPayload);
+            console.log("Order Payload:", orderPayload);
 
-                setUserBalance(prev => prev + totalEarnings);
-                setuserStockMoney(prev => prev - qty);
-                clearForms();
-                setSuccessMessage(`🎉 Congratulations! You successfully sold ${qty} shares of ${symbol} for $${totalEarnings.toFixed(2)}!`);
-                setTimeout(() => setSuccessMessage(''), 10000);
+            await axios.post("http://localhost:8080/orders", orderPayload);
 
-            }
-            catch (error) {
-                setErrors({ api: "Transaction failed. Please try again." });
-            }
-        
+            setUserBalance(prev => prev + totalEarnings);
+            setuserStockMoney(prev => prev - qty);
+            clearForms();
+            setSuccessMessage(`🎉 Congratulations! You successfully sold ${qty} shares of ${symbol} for $${totalEarnings.toFixed(2)}!`);
+            setTimeout(() => setSuccessMessage(''), 10000);
+
+        }
+        catch (error) {
+            setErrors({ api: "Transaction failed. Please try again." });
+        }
+
     };
     const addToWatchlist = async (watchlistId, stockSymbol) => {
         try {
@@ -432,10 +449,11 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
         setSelectedWatchlists([]);
     };
 
+
     return (
         <div className="stock-manipulation-container">
             <h3 className="stock-manipulation-title">
-                Investment Options for {symbol}
+                Investment Options for {company ? company : symbol}
             </h3>
 
             {/* User Info */}
@@ -484,7 +502,7 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                     {errors.quantity && <div>{errors.quantity}</div>}
                     {errors.watchlist && <div>{errors.watchlist}</div>}
                     {errors.sipAmount && <div>{errors.sipAmount}</div>}
-                    
+
                 </div>
             )}
 
@@ -606,42 +624,35 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                     <h4 className="form-title">Buy {symbol}</h4>
 
                     <div className="mb-3">
-                        <label className="form-label">
-                            Quantity *
-                        </label>
+                        <label className="form-label">Quantity *</label>
                         <input
                             type="number"
                             value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
+                            onChange={handleQuantityChange}
                             placeholder="Enter quantity"
                             className="form-input"
                         />
-
-                       
                     </div>
 
                     <div className="form-info">
-                        <p><strong>Price per share:</strong> ${currentPrice.toFixed(2)}</p>
+                        <p><strong>Price per share:</strong> ${(lockedPrice ?? currentPrice).toFixed(2)}</p>
                         {quantity && !isNaN(quantity) && parseFloat(quantity) > 0 && (
-                            <p><strong>Total Cost:</strong> ${(parseFloat(quantity) * currentPrice).toFixed(2)}</p>
+                            <p><strong>Total Cost:</strong> {(parseFloat(quantity) * (lockedPrice ?? currentPrice)).toFixed(2)}</p>
                         )}
                     </div>
 
                     <div className="form-buttons">
-                        <button onClick={handleBuy} className="btn-confirm">
-                            Confirm Buy
-                        </button>
-                        <button onClick={clearForms} className="btn-cancel">
-                            Cancel
-                        </button>
+                        <button onClick={handleBuy} className="btn-confirm">Confirm Buy</button>
+                        <button onClick={clearForms} className="btn-cancel">Cancel</button>
                     </div>
                 </div>
             )}
 
 
+
             {/* Sell Form for Stock Delivery */}
             {showSellForm && investmentType === 'Delivery' && (
-                
+
                 <div className="form-container">
                     <h4 className="form-title">Sell {symbol}</h4>
 
@@ -658,10 +669,10 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                             className="form-input"
                         />
 
-                        
-                        
+
+
                     </div>
-                    
+
                     <div className="form-info">
                         <p><strong>Price per share:</strong> ${currentPrice.toFixed(2)}</p>
                         {quantity && !isNaN(quantity) && parseFloat(quantity) > 0 && (

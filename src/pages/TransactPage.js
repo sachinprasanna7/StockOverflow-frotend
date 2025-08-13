@@ -11,19 +11,136 @@ export default function TransactPage() {
   const [tradingBalance, setTradingBalance] = useState({ amount: 0, loading: false });
   const [stockInvestments, setStockInvestments] = useState({ amount: 0, loading: false });
   const [transaction, setTransaction] = useState({ type: 'deposit', amount: '', loading: false });
+  const [stocksData, setStocksData] = useState([]);
+  const [currentPrices, setCurrentPrices] = useState({});
+  const [portfolio, setPortfolio] = useState([]);
+  const [loading, setLoading] = useState(true);
+
 
   // Fetch stock investments
-  const fetchStockInvestments = async () => {
-    try {
-      setStockInvestments(prev => ({ ...prev, loading: true }));
-      const res = await fetch('http://localhost:8080/useraccount/getStockInvestmentsMoney?userId=1');
-      const data = await res.json();
-      setStockInvestments({ amount: data.stock_investments_money, loading: false });
-    } catch (err) {
-      setError(err.message || 'Failed to load investments');
-      setStockInvestments(prev => ({ ...prev, loading: false }));
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // 1. Fetch portfolio holdings
+        console.log("Fetching portfolio...");
+        const portfolioRes = await fetch("http://localhost:8080/portfolio/all");
+        if (!portfolioRes.ok) {
+          throw new Error(`Portfolio fetch failed: ${portfolioRes.status}`);
+        }
+        const portfolioData = await portfolioRes.json();
+        console.log("Portfolio fetched:", portfolioData);
+        setPortfolio(portfolioData);
+
+        // Check if portfolio is empty
+        if (!portfolioData || portfolioData.length === 0) {
+          console.log("No portfolio data found");
+          setLoading(false);
+          return;
+        }
+
+        // 2. Extract unique symbolIds
+        const symbolIds = [...new Set(portfolioData.map((item) => item.symbolId))];
+        console.log("Symbol IDs:", symbolIds);
+
+        // 3. Fetch stock details by symbolId
+        const stockDetailsFetches = symbolIds.map(async (id) => {
+          try {
+            const res = await fetch(`http://localhost:8080/api/stock/${id}`);
+            if (!res.ok) {
+              console.error(`Failed to fetch stock ${id}: ${res.status}`);
+              return null;
+            }
+            const data = await res.json();
+            console.log(`Stock data for ${id}:`, data);
+            return { ...data, symbolId: id }; // Ensure symbolId is included
+          } catch (err) {
+            console.error(`Error fetching stock ${id}:`, err);
+            return null;
+          }
+        });
+
+        const stocksDetails = await Promise.all(stockDetailsFetches);
+        const validStocks = stocksDetails.filter(stock => stock !== null);
+        console.log("Valid stocks:", validStocks);
+        setStocksData(validStocks);
+
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(err.message || "Failed to load data");
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!stocksData || stocksData.length === 0) return;
+
+    let intervalId;
+
+    const fetchCurrentPrices = async () => {
+      try {
+        const symbols = stocksData.map(stock => stock.symbol).filter(Boolean);
+        console.log("Fetching prices for symbols:", symbols);
+
+        if (symbols.length === 0) return;
+
+        const priceFetches = symbols.map(async symbol => {
+          try {
+            const res = await fetch(`http://localhost:4000/api/currentStockValue/${symbol}`);
+            if (!res.ok) {
+              console.error(`Failed to fetch price for ${symbol}: ${res.status}`);
+              return { symbol, price: 0 };
+            }
+            const data = await res.json();
+            return {
+              symbol,
+              price: data?.[0]?.price ?? 0
+            };
+          } catch (err) {
+            console.error(`Error fetching price for ${symbol}:`, err);
+            return { symbol, price: 0 };
+          }
+        });
+
+        const pricesArray = await Promise.all(priceFetches);
+        console.log("Prices fetched:", pricesArray);
+
+        const priceMap = pricesArray.reduce((acc, { symbol, price }) => {
+          acc[symbol] = price;
+          return acc;
+        }, {});
+
+        setCurrentPrices(priceMap);
+
+      } catch (err) {
+        console.error("Error fetching prices:", err);
+      }
+    };
+
+    fetchCurrentPrices();
+
+    // Fetch every 3s
+    intervalId = setInterval(fetchCurrentPrices, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [stocksData, portfolio]);
+  // const fetchStockInvestments = async () => {
+  //   try {
+  //     setStockInvestments(prev => ({ ...prev, loading: true }));
+  //     const res = await fetch('http://localhost:8080/useraccount/getStockInvestmentsMoney?userId=1');
+  //     const data = await res.json();
+  //     setStockInvestments({ amount: data.stock_investments_money, loading: false });
+  //   } catch (err) {
+  //     setError(err.message || 'Failed to load investments');
+  //     setStockInvestments(prev => ({ ...prev, loading: false }));
+  //   }
+  // };
 
   // Fetch trading balance
   const fetchTradingBalance = async () => {
@@ -68,8 +185,18 @@ export default function TransactPage() {
 
   useEffect(() => {
     fetchTradingBalance();
-    fetchStockInvestments();
+    
   }, []);
+
+
+  const totalCurrent = portfolio.reduce((sum, item) => {
+    const stock = stocksData.find(s => s.symbolId === item.symbolId);
+    const symbol = stock?.symbol;
+    if (!symbol) return sum;
+
+    const currentPrice = currentPrices[symbol] || 0;
+    return sum + item.stockQuantity * currentPrice;
+  }, 0);
 
   return (
     <div className="d-flex min-vh-100 bg-light">
@@ -111,19 +238,17 @@ export default function TransactPage() {
                   <small className="text-muted">Ready to trade</small>
                 </div>
                 <div className="col-6">
-                  <h6 className="text-muted">Stock Investments</h6>
+                  <h6 className="text-muted">Stock Investment Assests</h6>
                   <h3 className="fw-bold text-primary">
-                    {stockInvestments.loading ? (
-                      <div className="spinner-border text-primary" role="status"></div>
-                    ) : (
-                      `$${stockInvestments.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
-                    )}
+                    
+                    ${totalCurrent.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    
                   </h3>
-                  <small className="text-muted">Currently invested</small>
+                  <small className="text-muted">Currently value</small>
                 </div>
               </div>
               <hr />
-              <h6 className="mt-3">Total Money</h6>
+              <h6 className="mt-3">Total Assest</h6>
               <h2 className="fw-bold text-warning">
                 ${(tradingBalance.amount + stockInvestments.amount).toLocaleString('en-US', {
                   minimumFractionDigits: 2

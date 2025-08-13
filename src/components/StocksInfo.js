@@ -92,7 +92,6 @@ export default function StocksInfo({ selectedStock }) {
     const handlePriceUpdate = (newPrice) => {
         setCurrentPrice(newPrice);
     };
-
     if (loading) {
         return (
             <div style={{ marginLeft: "250px", padding: "20px", textAlign: "center", fontSize: "1.5rem", color: "#113F67" }}>

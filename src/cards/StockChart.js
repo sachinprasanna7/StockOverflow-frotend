@@ -137,7 +137,7 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
                             </option>
                         ))}
                     </select>
-                    <span className="period-text">values</span>
+                    <span className="period-text">seconds</span>
                 </div>
             </div>
 
