@@ -84,7 +84,7 @@ const OrderCard = ({ order }) => {
           
           <div className="detail-item">
             <span className="detail-label">Amount</span>
-            <span className="detail-value">₹{transactionAmount.toLocaleString()}</span>
+            <span className="detail-value">${transactionAmount.toLocaleString()}</span>
           </div>
           
           <div className="detail-item">
@@ -160,14 +160,14 @@ const OrderCard = ({ order }) => {
                   <div className="info-row">
                     <span className="info-label">Unit Price</span>
                     <span className="info-value">
-                      ₹{(transactionAmount / stockQuantity).toFixed(2)}
+                      ${(transactionAmount / stockQuantity).toFixed(2)}
                     </span>
                   </div>
                   
                   <div className="info-row">
                     <span className="info-label">Total Amount</span>
                     <span className="info-value amount-highlight">
-                      ₹{transactionAmount.toLocaleString()}
+                      ${transactionAmount.toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -217,7 +217,7 @@ const OrderCard = ({ order }) => {
                   <div className="info-row">
                     <span className="info-label">Value</span>
                     <span className="info-value amount-highlight">
-                      ₹{transactionAmount.toLocaleString()}
+                      ${transactionAmount.toLocaleString()}
                     </span>
                   </div>
                 </div>
