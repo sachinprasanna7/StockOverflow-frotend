@@ -2,7 +2,7 @@
 .chatbot-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px); /* Account for TimePeriod component and padding */
+  height: calc(100vh - 120px); 
   max-width: 1000px;
   margin: 20px auto;
   border: none;

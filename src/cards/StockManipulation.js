@@ -5,7 +5,7 @@ import '../styles/StockManipulation.css';
 
 
 export default function StockManipulation({ symbol, companyName, currentPrice }) {
-    const [investmentType, setInvestmentType] = useState('SIP');
+    const [investmentType, setInvestmentType] = useState('Delivery');
     const [showBuyForm, setShowBuyForm] = useState(false);
     const [showSellForm, setShowSellForm] = useState(false);
     const [showWatchlistForm, setShowWatchlistForm] = useState(false);
@@ -455,12 +455,12 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
             {/* Investment Type Toggle */}
             <div className="investment-toggle-container">
                 <div className="investment-toggle-wrapper">
-                    <button
+                    {/* <button
                         onClick={() => resetFormsAndState('SIP')}
                         className={`investment-toggle-btn ${investmentType === 'SIP' ? 'active' : 'inactive'}`}
                     >
                         SIP
-                    </button>
+                    </button> */}
                     <button
                         onClick={() => resetFormsAndState('Delivery')}
                         className={`investment-toggle-btn ${investmentType === 'Delivery' ? 'active' : 'inactive'}`}

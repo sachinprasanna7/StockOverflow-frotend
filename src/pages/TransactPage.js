@@ -123,7 +123,7 @@ export default function TransactPage() {
                 </div>
               </div>
               <hr />
-              <h6 className="mt-3">Total Portfolio Value</h6>
+              <h6 className="mt-3">Total Money</h6>
               <h2 className="fw-bold text-warning">
                 ${(tradingBalance.amount + stockInvestments.amount).toLocaleString('en-US', {
                   minimumFractionDigits: 2

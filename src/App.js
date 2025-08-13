@@ -10,7 +10,6 @@ import SettingsPage from "./pages/SettingsPage";
 import PortfolioPage1 from "./pages/PortfolioPage1";
 import StocksPage from "./pages/StocksPage";
 import TransactPage from "./pages/TransactPage";
-import SipPage from "./pages/SipPage";
 import HelpPage from "./pages/HelpPage";
 
 export default function App() {
@@ -25,7 +24,6 @@ export default function App() {
         <Route path="/portfolio" element={<PortfolioPage1 />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/transact" element={<TransactPage />} />
-        <Route path="/sip" element={<SipPage />} />
         <Route path="/stock/:symbol" element={<StocksPage />} />
         <Route path="/help" element={<HelpPage />} />
       </Routes>

@@ -6,8 +6,6 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
     const [currentData, setCurrentData] = useState([]);
     const [loading, setLoading] = useState(true);
     const chartRef = useRef(null);
-    console.log('StockChart rendered with symbol:', symbol, 'and valuesToShow:', valuesToShow);
-    console.log("curretnt price", currentPrice)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -15,7 +13,7 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
                 setLoading(true);
                 const response = await fetch(`http://localhost:4000/api/chartValues/${symbol}?noOfValues=${valuesToShow}`);
                 const data = await response.json();
-                console.log('Fetched chart data:', data);
+                //console.log('Fetched chart data:', data);
 
                 // Process the data to ensure proper sorting by timestamp
                 const processedData = data
