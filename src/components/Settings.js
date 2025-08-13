@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import * as axios from "axios";
+import  axios from "axios";
 
 
 export default function Settings() {
