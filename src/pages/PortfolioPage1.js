@@ -12,7 +12,7 @@ import Orders from "../cards/OrderCard";
 import OrderHistory from "../components/OrderHistory";
 import SearchOrders from "../components/SearchOrders";
 
-export default function OrderHistoryPage() {
+export default function PortfolioPage1() {
   return (
     <div className="d-flex min-vh-100">
       <Sidebar />

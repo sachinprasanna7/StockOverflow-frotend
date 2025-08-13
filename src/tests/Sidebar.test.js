@@ -2,7 +2,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "../components/Sidebar";
 
 // Mock images
 jest.mock("../assets/stock-overflow-logo.jpeg", () => "bull-bear-mock");
