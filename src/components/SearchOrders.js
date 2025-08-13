@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { InputGroup, FormControl } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
-import axios from "axios";
+import * as axios from "axios";
 import OrderCard from "../cards/OrderCard"; // Adjust path if needed
 
 export default function SearchOrders() {

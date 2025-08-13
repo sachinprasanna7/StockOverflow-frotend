@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import WebFont from "webfontloader";
-import axios from "axios";
+import * as axios from "axios";
 import StockChart from "../cards/StockChart";
 import StockManipulation from "../cards/StockManipulation";
 import "../styles/styleInfo.css"; // Assuming you have a CSS file for styles

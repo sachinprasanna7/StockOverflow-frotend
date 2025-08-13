@@ -1,4 +1,4 @@
-import axios from "axios";
+import * as axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 
 function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) {
