@@ -74,7 +74,14 @@ function WatchlistCard({ watchlistId, title, stocks, isPositive, refreshData }) 
   );
 
   return (
-    <div className={`card border-${isPositive ? "success" : "danger"} mb-4 position-relative`}>
+    <div
+    className={`card mb-4 position-relative ${
+      stocks.length === 0
+        ? "" // no Bootstrap border class here
+        : `border-${isPositive ? "success" : "danger"}`
+    }`}
+    
+  >
       <div className="card-header d-flex justify-content-between align-items-center">
         <h5 className="card-title mb-0 fst-italic">{title}</h5>
 

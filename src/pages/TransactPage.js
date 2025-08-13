@@ -78,7 +78,7 @@ export default function TransactPage() {
         <TimePeriod />
         <IndexDataRibbon />
 
-        <div className="container mt-4">
+        <div className="container mt-4 custom-layout">
           {/* Account Balance Card */}
           <div
             className="card shadow-lg border-0 mb-4"
