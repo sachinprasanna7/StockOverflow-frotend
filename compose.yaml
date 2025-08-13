@@ -1,0 +1,36 @@
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["npm", "start"]
+    ports:
+      - "3000:3000"
+    depends_on:
+      - proxy-server
+
+  proxy-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["node", "proxy-server.js"]
+    ports:
+      - "4000:4000"
+
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    entrypoint: ["/bin/sh", "-c", "/start-ollama.sh"]
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./start-ollama.sh:/start-ollama.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  ollama_data:
