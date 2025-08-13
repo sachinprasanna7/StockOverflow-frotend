@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Sidebar from '../components/Sidebar';
 import TimePeriod from '../components/TimePeriod';
 import IndexDataRibbon from '../components/IndexDataRibbon';
-import axios from 'axios';
+import * as axios from "axios";
 import '../styles/PortfolioPage.css';
 
 export default function TransactPage() {

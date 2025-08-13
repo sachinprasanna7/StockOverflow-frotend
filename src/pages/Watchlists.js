@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import * as axios from "axios";
 import TimePeriod from "../components/TimePeriod";
 import Sidebar from "../components/Sidebar";
 import WatchlistCard from "../components/WatchlistCard";

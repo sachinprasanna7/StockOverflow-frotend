@@ -1,4 +1,4 @@
-import axios from "axios";
+import * as axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 function getPeriodFromTime() {

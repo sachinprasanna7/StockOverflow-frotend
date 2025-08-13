@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Form, InputGroup } from "react-bootstrap";
 import { FaSearch, FaTimes, FaClock } from "react-icons/fa";
-import axios from "axios";
+import * as axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function SearchBar({ onStockSelect }) {
