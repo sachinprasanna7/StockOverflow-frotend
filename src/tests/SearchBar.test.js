@@ -1,7 +1,7 @@
 // SearchBar.test.js
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import SearchBar from "./SearchBar";
+import SearchBar from "../components/SearchBar";
 import axios from "axios";
 import { BrowserRouter } from "react-router-dom";
 
