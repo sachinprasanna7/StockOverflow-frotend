@@ -24,9 +24,9 @@ A comprehensive stock trading platform built with React and Spring Boot, featuri
 ![Portfolio](./screenshots/portfolio.png)
 *Portfolio management and performance tracking*
 
-### Trading Wallet
+### Trading Waller
 ![Transaction](./screenshots/transact.png)
-*Manage funds to and from your trading wallet*
+*Manage your funds*
 
 ### Order Management
 ![Orders](./screenshots/orders.png)
@@ -53,7 +53,7 @@ Before running this application, ensure you have the following installed:
 - **Ollama** (for AI chatbot functionality)
 - **Backend Server** - Make sure your Spring Boot backend and MySQL server are running
 
-> **Note**: This frontend application requires a separate backend server (Spring Boot + MySQL). Please ensure the backend is running before starting the frontend. The backend repository can be found in `https://github.com/sachinprasanna7/StockOverflow-backend`
+> **Note**: This frontend application requires a separate backend server (Spring Boot + MySQL). Please ensure the backend is running before starting the frontend.
 
 ## 📦 Installation & Setup
 
@@ -145,7 +145,75 @@ Ensure your backend server is configured with the following endpoints:
 
 ## 🚀 Running the Complete Application
 
-To run the full application stack:
+### Option 1: Docker (Recommended)
+
+The easiest way to run the application is using Docker. This method handles all dependencies and services automatically.
+
+#### Prerequisites for Docker
+- **Docker** installed on your system
+- **Docker Compose** installed
+- **Ollama** (still needs to be installed separately for AI functionality)
+
+#### Steps to Run with Docker
+
+1. **Ensure Backend is Running** (separate repository)
+   - Make sure your Spring Boot backend and MySQL are running
+
+2. **Setup Ollama for AI Assistant**
+   ```bash
+   # Install Ollama (if not already installed)
+   # Download from https://ollama.ai
+   
+   # Create the trading assistant model
+   cd src/model
+   ollama create trading-assistant -f Modelfile
+   ollama run trading-assistant
+   ```
+
+3. **Build and Run with Docker Compose**
+   ```bash
+   # Build and start all services
+   docker-compose up --build
+   
+   # Or run in detached mode (background)
+   docker-compose up -d --build
+   ```
+
+4. **Access the Application**
+   - Frontend: `http://localhost:3000`
+   - Backend API: `http://localhost:8080` (external)
+   - Ollama API: `http://localhost:11434` (external)
+
+#### Docker Commands
+
+```bash
+# Start services
+docker-compose up
+
+# Start services in background
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# Rebuild and start
+docker-compose up --build
+
+# View logs
+docker-compose logs
+
+# View logs for specific service
+docker-compose logs frontend
+```
+
+#### Docker Services
+The `compose.yaml` includes:
+- **Frontend React App** - Port 3000
+- **Proxy Server** - Integrated with frontend container
+
+### Option 2: Manual Setup (Development)
+
+For development or manual setup:
 
 1. **Start Backend Services** (separate repository)
    - Start MySQL server
@@ -167,11 +235,12 @@ To run the full application stack:
    - Frontend: `http://localhost:3000`
    - Backend API: `http://localhost:8080`
    - Ollama API: `http://localhost:11434`
-   - Proxy Server: `http://localhost:4000`
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
+
+#### Manual Setup Issues
 
 **React App Won't Start**
 - Check if port 3000 is available
@@ -179,7 +248,25 @@ To run the full application stack:
 
 **Proxy Server Issues**
 - Verify the proxy server is running: `node proxy-server.js`
-- Check if port 4000 is available
+- Check if port 3001 is available
+
+#### Docker Issues
+
+**Docker Build Fails**
+- Ensure Docker is running: `docker --version`
+- Check if ports 3000 are available
+- Try rebuilding: `docker-compose build --no-cache`
+
+**Container Won't Start**
+- Check Docker logs: `docker-compose logs`
+- Ensure sufficient disk space
+- Verify Docker Compose file syntax
+
+**Port Conflicts**
+- Stop other services using port 3000
+- Modify ports in `compose.yaml` if needed
+
+#### Common to Both Setups
 
 **AI Assistant Not Working**
 - Ensure Ollama is installed and running
@@ -200,13 +287,15 @@ To run the full application stack:
 **"Network Error" or "API Error"**
 - Verify backend server is running
 - Check proxy server status
+- Confirm environment variables are set correctly
 
 
 ## 📞 Contributers
 
-- Prerak Varshney
+For support and questions:
+
 - Khushi Suresh Muddi
+- Prerak Varshney
 - Sruthi R
 - Sachin Prasanna
 
-**Happy Trading! 📈**
