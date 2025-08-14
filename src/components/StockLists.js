@@ -130,23 +130,38 @@ export default function StockLists() {
 
         for (let category in updatedData) {
           for (let stock of updatedData[category]) {
-          
-            const res = await axios.get(`http://localhost:4000/api/currentStockValue/${stock.symbol.toLowerCase()}`);
-            console.log((res.data[0] .price))
 
-            const data = await res.data[0].price;
-            stock.price = data;
-            console.log(`Fetched price for ${stock.symbol}:`, stock.price);
+            const res = await axios.get(`http://localhost:4000/api/currentStockValue/${stock.symbol.toLowerCase()}`);
+            console.log((res.data[0].price))
+
+           const newPrice = Array.isArray(res.data)
+              ? res.data[0]?.price
+              : res.data?.price;
+
+            if (newPrice != null) {
+              // Calculate change and changeValue
+              if (stock.price && stock.price !== 0) {
+                const oldPrice = stock.price;
+                const diff = newPrice - oldPrice;
+                const percentChange = ((diff / oldPrice) * 100).toFixed(2);
+
+                stock.change = `${diff >= 0 ? "+" : ""}${percentChange}%`;
+                stock.changeValue = `${diff >= 0 ? "+" : ""}${diff.toFixed(2)}`;
+              }
+
+              // Update price
+              stock.price = parseFloat(newPrice.toFixed(2));
+            }
           }
         }
 
-        setStocksData({ ...updatedData });
+        setStocksData(updatedData);
       } catch (err) {
         console.error("Error fetching stock prices:", err);
       }
     };
-console.log("Fetching stock prices...");
-console.log(initialData);
+    console.log("Fetching stock prices...");
+    console.log(initialData);
     // First fetch immediately
     fetchPrices();
 
@@ -155,7 +170,7 @@ console.log(initialData);
 
     // Cleanup on unmount
     return () => clearInterval(intervalId);
-  }, );
+  },);
 
 
   return (
@@ -174,3 +189,6 @@ console.log(initialData);
     </div>
   );
 }
+
+
+
