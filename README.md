@@ -200,7 +200,6 @@ To run the full application stack:
 **"Network Error" or "API Error"**
 - Verify backend server is running
 - Check proxy server status
-- Confirm environment variables are set correctly
 
 
 ## 📞 Contributers
