@@ -1,4 +1,4 @@
-# Stocks Overflow - Trading Platform
+# Stock Overflow - Trading Platform
 
 A comprehensive stock trading platform built with React and Spring Boot, featuring real-time market data, portfolio management, and AI-powered trading assistance.
 
