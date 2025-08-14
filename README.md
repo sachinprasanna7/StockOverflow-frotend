@@ -1,70 +1,213 @@
-# Getting Started with Create React App
+# Stocks Overflow - Trading Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive stock trading platform built with React and Spring Boot, featuring real-time market data, portfolio management, and AI-powered trading assistance.
 
-## Available Scripts
+![Dashboard Screenshot](./screenshots/dashboard.png)
 
-In the project directory, you can run:
+## 🚀 Features
 
-### `npm start`
+- **Real-time Dashboard** - Live market data and portfolio overview
+- **Portfolio Management** - Track your investments and performance
+- **Trading Interface** - Buy and sell stocks with ease
+- **Order Management** - View and manage your trading orders
+- **Watchlists** - Monitor your favorite stocks
+- **Settings** - Customize your trading experience
+- **AI Trading Assistant** - Get intelligent trading insights powered by Ollama
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📸 Screenshots
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Dashboard
+![Dashboard](./screenshots/dashboard.png)
+*Main dashboard with market overview and portfolio summary*
 
-### `npm test`
+### Portfolio
+![Portfolio](./screenshots/portfolio.png)
+*Portfolio management and performance tracking*
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Trading Interface
+![Transaction](./screenshots/transact.png)
+*Buy and sell stocks with real-time pricing*
 
-### `npm run build`
+### Order Management
+![Orders](./screenshots/orders.png)
+*View and manage all your trading orders*
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Watchlists
+![Watchlists](./screenshots/watchlists.png)
+*Monitor your favorite stocks and market movements*
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Settings
+![Settings](./screenshots/settings.png)
+*Customize your trading preferences and account settings*
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### AI Assistant
+![Ask AI](./screenshots/ask-ai.png)
+*Get intelligent trading insights from our AI assistant*
 
-### `npm run eject`
+## 🛠️ Prerequisites
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Before running this application, ensure you have the following installed:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Node.js** (v14 or higher)
+- **npm** or **yarn**
+- **Ollama** (for AI chatbot functionality)
+- **Backend Server** - Make sure your Spring Boot backend and MySQL server are running
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+> **Note**: This frontend application requires a separate backend server (Spring Boot + MySQL). Please ensure the backend is running before starting the frontend.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📦 Installation & Setup
 
-## Learn More
+### Step 1: Install React Dependencies
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Clone the repository and install the required dependencies:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd stocks-overflow-frontend
 
-### Code Splitting
+# Install dependencies
+npm install
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+# Or using yarn
+yarn install
+```
 
-### Analyzing the Bundle Size
+### Step 2: Start the React Development Server
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Launch the React application:
 
-### Making a Progressive Web App
+```bash
+# Start the development server
+npm start
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+# Or using yarn
+yarn start
+```
 
-### Advanced Configuration
+The application will be available at `http://localhost:3000`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Step 3: Run the Proxy Server
 
-### Deployment
+The proxy server handles API requests and provides additional functionality. Run it in a separate terminal:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```bash
+# Navigate to the project root (if not already there)
+cd stocks-overflow-frontend
 
-### `npm run build` fails to minify
+# Run the proxy server
+node proxy-server.js
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+> **Important**: Keep this terminal window open while using the application.
+
+### Step 4: Setup Ollama for AI Assistant
+
+The AI trading assistant requires Ollama to be installed and configured:
+
+#### 4.1 Install Ollama
+
+Download and install Ollama from [https://ollama.ai](https://ollama.ai)
+
+#### 4.2 Create the Trading Assistant Model
+
+Navigate to the model directory and create the custom trading assistant:
+
+```bash
+# Navigate to the model directory
+cd src/model
+
+# Create the trading assistant model
+ollama create trading-assistant -f Modelfile
+
+# Run the trading assistant
+ollama run trading-assistant
+```
+
+#### 4.3 Verify Ollama Setup
+
+Ensure Ollama is running on the default port (11434):
+
+```bash
+# Test if Ollama is accessible
+curl http://localhost:11434/api/tags
+```
+
+## 🔧 Configuration
+
+### Backend Configuration
+
+Ensure your backend server is configured with the following endpoints:
+
+- **API Base URL**: `http://localhost:8080`
+- **Database**: MySQL running on default port (3306)
+- **CORS**: Enabled for `http://localhost:3000`
+
+## 🚀 Running the Complete Application
+
+To run the full application stack:
+
+1. **Start Backend Services** (separate repository)
+   - Start MySQL server
+   - Start Spring Boot application
+
+2. **Start Frontend Services** (this repository)
+   ```bash
+   # Terminal 1: Start React app
+   npm start
+   
+   # Terminal 2: Start proxy server
+   node proxy-server.js
+   
+   # Terminal 3: Start Ollama (if not running as service)
+   ollama run trading-assistant
+   ```
+
+3. **Access the Application**
+   - Frontend: `http://localhost:3000`
+   - Backend API: `http://localhost:8080`
+   - Ollama API: `http://localhost:11434`
+   - Proxy Server: `http://localhost:4000`
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**React App Won't Start**
+- Check if port 3000 is available
+- Ensure all dependencies are installed: `npm install`
+
+**Proxy Server Issues**
+- Verify the proxy server is running: `node proxy-server.js`
+- Check if port 4000 is available
+
+**AI Assistant Not Working**
+- Ensure Ollama is installed and running
+- Verify the trading-assistant model is created: `ollama list`
+- Check if port 11434 is accessible
+
+**Backend Connection Issues**
+- Confirm the Spring Boot backend is running
+- Check MySQL database connection
+- Verify CORS settings in backend
+
+### Error Messages
+
+**"Unable to connect to the AI service"**
+- Restart Ollama: `ollama run trading-assistant`
+- Check if port 11434 is open
+
+**"Network Error" or "API Error"**
+- Verify backend server is running
+- Check proxy server status
+- Confirm environment variables are set correctly
+
+
+## 📞 Contributers
+
+- Prerak Varshney
+- Khushi Suresh Muddi
+- Sruthi R
+- Sachin Prasanna
+
+**Happy Trading! 📈**
