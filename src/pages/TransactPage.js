@@ -203,8 +203,6 @@ export default function TransactPage() {
       <Sidebar />
       <div className="flex-grow-1 p-4">
         <TimePeriod />
-        <IndexDataRibbon />
-
         <div className="container mt-4 custom-layout">
           {/* Account Balance Card */}
           <div
