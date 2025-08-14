@@ -232,10 +232,13 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
 
             const now = new Date();
             const formattedNow = now.toISOString().slice(0, 19);
+            // add 5 hours and 30 minutes to formatted now
+            const indiaTime = new Date(now.getTime() + 5 * 60 * 60 * 1000 + 30 * 60 * 1000);
+            const formattedIndiaTime = indiaTime.toISOString().slice(0, 19);
             // 4. Create order
             const orderPayload = {
-                timeOrdered: formattedNow,
-                timeCompleted: formattedNow,
+                timeOrdered: formattedIndiaTime,
+                timeCompleted: formattedIndiaTime,
                 stock: {
                     symbol_id: stockData.symbol_id
                 },
