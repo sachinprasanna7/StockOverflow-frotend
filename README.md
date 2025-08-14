@@ -24,9 +24,9 @@ A comprehensive stock trading platform built with React and Spring Boot, featuri
 ![Portfolio](./screenshots/portfolio.png)
 *Portfolio management and performance tracking*
 
-### Trading Interface
+### Trading Wallet
 ![Transaction](./screenshots/transact.png)
-*Buy and sell stocks with real-time pricing*
+*Manage funds to and from your trading wallet*
 
 ### Order Management
 ![Orders](./screenshots/orders.png)
