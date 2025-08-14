@@ -270,7 +270,7 @@ export default function StockChart({ symbol, currentPrice, companyName }) {
                 </div>
 
                 <div className="stat-item">
-                    <div className="stat-label">Values</div>
+                    <div className="stat-label">Seconds</div>
                     <div className="stat-value neutral">{currentData.length}</div>
                 </div>
 

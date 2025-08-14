@@ -245,13 +245,13 @@ export default function TransactPage() {
                   <small className="text-muted">Currently value</small>
                 </div>
               </div>
-              <hr />
-              <h6 className="mt-3">Total Assest</h6>
+              {/* <hr />
+              <h6 className="mt-3">Total Assets</h6>
               <h2 className="fw-bold text-warning">
                 ${(tradingBalance.amount + stockInvestments.amount).toLocaleString('en-US', {
                   minimumFractionDigits: 2
                 })}
-              </h2>
+              </h2> */}
             </div>
           </div>
 

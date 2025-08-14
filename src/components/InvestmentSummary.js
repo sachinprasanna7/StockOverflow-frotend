@@ -103,25 +103,25 @@ export default function InvestmentSummary() {
           setError(null);
   
           // 1. Fetch portfolio holdings
-          console.log("Fetching portfolio...");
+          //console.log("Fetching portfolio...");
           const portfolioRes = await fetch("http://localhost:8080/portfolio/all");
           if (!portfolioRes.ok) {
             throw new Error(`Portfolio fetch failed: ${portfolioRes.status}`);
           }
           const portfolioData = await portfolioRes.json();
-          console.log("Portfolio fetched:", portfolioData);
+          //console.log("Portfolio fetched:", portfolioData);
           setPortfolio(portfolioData);
   
           // Check if portfolio is empty
           if (!portfolioData || portfolioData.length === 0) {
-            console.log("No portfolio data found");
+            //console.log("No portfolio data found");
             setLoading(false);
             return;
           }
   
           // 2. Extract unique symbolIds
           const symbolIds = [...new Set(portfolioData.map((item) => item.symbolId))];
-          console.log("Symbol IDs:", symbolIds);
+          //console.log("Symbol IDs:", symbolIds);
   
           // 3. Fetch stock details by symbolId
           const stockDetailsFetches = symbolIds.map(async (id) => {
@@ -132,7 +132,7 @@ export default function InvestmentSummary() {
                 return null;
               }
               const data = await res.json();
-              console.log(`Stock data for ${id}:`, data);
+              //console.log(`Stock data for ${id}:`, data);
               return { ...data, symbolId: id }; // Ensure symbolId is included
             } catch (err) {
               console.error(`Error fetching stock ${id}:`, err);
@@ -142,7 +142,7 @@ export default function InvestmentSummary() {
   
           const stocksDetails = await Promise.all(stockDetailsFetches);
           const validStocks = stocksDetails.filter(stock => stock !== null);
-          console.log("Valid stocks:", validStocks);
+          //console.log("Valid stocks:", validStocks);
           setStocksData(validStocks);
   
         } catch (err) {
@@ -164,7 +164,7 @@ export default function InvestmentSummary() {
       const fetchCurrentPrices = async () => {
         try {
           const symbols = stocksData.map(stock => stock.symbol).filter(Boolean);
-          console.log("Fetching prices for symbols:", symbols);
+          //console.log("Fetching prices for symbols:", symbols);
   
           if (symbols.length === 0) return;
   
@@ -187,7 +187,7 @@ export default function InvestmentSummary() {
           });
   
           const pricesArray = await Promise.all(priceFetches);
-          console.log("Prices fetched:", pricesArray);
+          //console.log("Prices fetched:", pricesArray);
   
           const priceMap = pricesArray.reduce((acc, { symbol, price }) => {
             acc[symbol] = price;
@@ -237,7 +237,7 @@ export default function InvestmentSummary() {
       }
     });
   
-    console.log("symbolIdToStock mapping:", symbolIdToStock);
+    //console.log("symbolIdToStock mapping:", symbolIdToStock);
   
     // Calculate totals
     const totalInvested = portfolio.reduce((sum, item) => sum + item.averagePrice * item.stockQuantity, 0);

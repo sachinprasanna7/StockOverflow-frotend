@@ -177,7 +177,7 @@ const handleStockClick = (stock) => {
           <Form.Control
             ref={searchInputRef}
             type="text"
-            placeholder="Search stocks, ETFs, cryptocurrencies..."
+            placeholder="Search for stocks..."
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={handleSearchFocus}

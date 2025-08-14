@@ -15,9 +15,9 @@ export default function WelcomeText() {
         const res = await axios.get("http://localhost:8080/useraccount/getAccountInfo", {
           params: { userId: 1 }
         });
-        console.log("User info fetched:", res.data);
+       // console.log("User info fetched:", res.data);
         const username = res.data?.fullName || "User"; 
-        console.log("Username:", username);
+       // console.log("Username:", username);
         setMessages([
           `Hello, ${username}!`,
           "Stocks are subject to market risks!",

@@ -81,7 +81,7 @@ export default function ChatBot() {
         <div className="chatbot-container">
             {/* Header */}
             <div className="chatbot-header">
-                <h2>🤖 Trading Assistant</h2>
+                <h2>🤖 AI Trading Assistant</h2>
                 <p>Get insights on US stocks, trading strategies, and market analysis</p>
             </div>
 

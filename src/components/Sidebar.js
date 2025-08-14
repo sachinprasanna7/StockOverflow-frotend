@@ -63,10 +63,10 @@ export default function Sidebar() {
     { name: "Dashboard", icon: "📊", path: "/dashboard" },
     { name: "Portfolio", icon: "💼", path: "/portfolio" },
     { name: "Orders", icon: "📋", path: "/order-history" },
-    { name: "Transact", icon: "💳", path: "/transact" },
-    { name: "Watchlist", icon: "👁️", path: "/watchlists" },
+    { name: "Trading Wallet", icon: "💳", path: "/transact" },
+    { name: "Watchlists", icon: "👁️", path: "/watchlists" },
     { name: "Settings", icon: "⚙️", path: "/settings" },
-    { name: "Chat With Us", icon: "❓", path: "/help" }  
+    { name: "Ask AI", icon: "🤖", path: "/help" }  
   ];
 
   return (

@@ -479,12 +479,12 @@ export default function StockManipulation({ symbol, companyName, currentPrice })
                     >
                         SIP
                     </button> */}
-                    <button
+                    {/* <button
                         onClick={() => resetFormsAndState('Delivery')}
                         className={`investment-toggle-btn ${investmentType === 'Delivery' ? 'active' : 'inactive'}`}
                     >
                         Stock Delivery
-                    </button>
+                    </button> */}
                 </div>
             </div>
 

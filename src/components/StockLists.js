@@ -18,9 +18,9 @@ var initialData = {
   ],
   trending: [
     { name: "AUTODESK INC", symbol: "ADSK", price: 0, change: "+8.7%", changeValue: "+3.83" },
-    { name: "J P Morgan Chase Co", symbol: "JPM", price: 0, change: "+6.2%", changeValue: "+7.29" },
+    { name: "SIGNET JEWELLERS LIMITED", symbol: "SIG", price: 0, change: "+6.2%", changeValue: "+7.29" },
     { name: "SNDK", symbol: "SNDK", price: 0, change: "+5.8%", changeValue: "+14.67" },
-    { name: "Western Digital Corporation", symbol: "WDC", price: 0, change: "+4.3%", changeValue: "+6.45" },
+    { name: "WESTERN DIGITAL CORPORATION", symbol: "WDC", price: 0, change: "+4.3%", changeValue: "+6.45" },
   ]
 };
 
@@ -47,12 +47,27 @@ function StockCard({ title, stocks, category }) {
 
   const getIcon = () => {
     switch (category) {
-      case "gainers": return "📈";
-      case "losers": return "📉";
-      case "trending": return "🔥";
+      case "gainers": return "💻"; // Top Tech Stocks
+      case "losers": return "💰"; // High Dividend Yield Stocks
+      case "trending": return "📈"; // Trending Stocks
       default: return "📊";
     }
   };
+
+  const getDescription = () => {
+    switch (category) {
+      case "gainers":
+        return "Tech stocks making the biggest moves today";
+      case "losers":
+        return "Stocks offering the highest dividend yields";
+      case "trending":
+        return "Most active stocks right now";
+      default:
+        return "";
+    }
+  };
+
+
 
   return (
     <div style={{ width: "100%" }} className={`card h-100 shadow-sm ${getCardStyle()}`}>
@@ -63,10 +78,9 @@ function StockCard({ title, stocks, category }) {
         </div>
 
         <p className="card-subtitle text-muted small mb-3">
-          {category === "trending"
-            ? "Most active stocks right now"
-            : "Stocks that moved the most today"}
+          {getDescription()}
         </p>
+
 
         <div className="list-group list-group-flush w-100 stock-list-container">
           {stocks.map((stock, i) => (
@@ -132,9 +146,9 @@ export default function StockLists() {
           for (let stock of updatedData[category]) {
 
             const res = await axios.get(`http://localhost:4000/api/currentStockValue/${stock.symbol.toLowerCase()}`);
-            console.log((res.data[0].price))
+            //console.log((res.data[0].price))
 
-           const newPrice = Array.isArray(res.data)
+            const newPrice = Array.isArray(res.data)
               ? res.data[0]?.price
               : res.data?.price;
 
@@ -160,8 +174,8 @@ export default function StockLists() {
         console.error("Error fetching stock prices:", err);
       }
     };
-    console.log("Fetching stock prices...");
-    console.log(initialData);
+    // console.log("Fetching stock prices...");
+    // console.log(initialData);
     // First fetch immediately
     fetchPrices();
 
@@ -177,10 +191,10 @@ export default function StockLists() {
     <div style={{ marginLeft: "250px", padding: "20px" }} className="container-fluid px-0">
       <div className="row g-4 center pe-4">
         <div style={{ width: "28%" }} className="col-md-4">
-          <StockCard title="Top Gainers" stocks={stocksData.gainers} category="gainers" />
+          <StockCard title="Top Tech Stocks" stocks={stocksData.gainers} category="gainers" />
         </div>
         <div style={{ width: "28%" }} className="col-md-4">
-          <StockCard title="Top Losers" stocks={stocksData.losers} category="losers" />
+          <StockCard title="High Dividend Yield Stocks" stocks={stocksData.losers} category="losers" />
         </div>
         <div style={{ width: "28%" }} className="col-md-4">
           <StockCard title="Trending Now" stocks={stocksData.trending} category="trending" />
