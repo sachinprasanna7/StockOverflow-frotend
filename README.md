@@ -292,8 +292,6 @@ For development or manual setup:
 
 ## 📞 Contributors
 
-For support and questions:
-
 - Khushi Suresh Muddi
 - Prerak Varshney
 - Sruthi R
