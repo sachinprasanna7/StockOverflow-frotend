@@ -290,7 +290,7 @@ For development or manual setup:
 - Confirm environment variables are set correctly
 
 
-## 📞 Contributers
+## 📞 Contributors
 
 For support and questions:
 
