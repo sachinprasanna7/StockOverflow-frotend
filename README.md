@@ -53,7 +53,7 @@ Before running this application, ensure you have the following installed:
 - **Ollama** (for AI chatbot functionality)
 - **Backend Server** - Make sure your Spring Boot backend and MySQL server are running
 
-> **Note**: This frontend application requires a separate backend server (Spring Boot + MySQL). Please ensure the backend is running before starting the frontend.
+> **Note**: This frontend service is designed to work with the [Stocks Overflow Backend](https://github.com/sachinprasanna7/StockOverflow-backend). Please ensure the backend is running before starting the frontend.
 
 ## 📦 Installation & Setup
 
